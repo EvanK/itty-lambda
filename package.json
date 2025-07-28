@@ -1,18 +1,22 @@
 {
+  "name": "itty-lambda",
   "exports": {
     ".": {
-      "require": {
-        "default": "./src/cjs/index.cjs",
-        "types": "./src/cjs/index.d.ts"
-      },
-      "import": {
-        "default": "./src/esm/index.mjs",
-        "types": "./src/esm/index.d.ts"
-      }
+      "require": "./build/cjs/index.js",
+      "import": "./build/esm/index.js"
     },
-    "./url": {},
-    "./ag": {},
-    "./alb": {}
+    "./url": {
+      "require": "./build/cjs/url.js",
+      "import": "./build/esm/url.js"
+    },
+    "./ag": {
+      "require": "./build/cjs/ag.js",
+      "import": "./build/esm/ag.js"
+    },
+    "./alb": {
+      "require": "./build/cjs/alb.js",
+      "import": "./build/esm/alb.js"
+    }
   },
   "scripts": {
     "lint": "eslint .",
