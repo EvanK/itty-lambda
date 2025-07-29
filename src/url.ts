@@ -11,7 +11,15 @@ import { error } from 'itty-router';
 
 import { combineQuery, splitHeaders } from './util';
 
-export async function fromEvent(event: LambdaFunctionURLEvent): Promise<RequestLike> {
+/**
+ * Accepts an event from an AWS Lambda function invocation by way of a
+ * function url, and formats it into a request suitable for routing through
+ * itty-router.
+ * 
+ * @param {LambdaFunctionURLEvent} event 
+ * @returns {Promise<RequestLike>}
+ */
+export async function eventToRequest(event: LambdaFunctionURLEvent): Promise<RequestLike> {
   const output: RequestLike = { method: '', url: '' };
 
   // no multi value headers to muck with here
@@ -35,7 +43,19 @@ export async function fromEvent(event: LambdaFunctionURLEvent): Promise<RequestL
   return output;
 }
 
-export async function fromResponse(response: Response | undefined): Promise<LambdaFunctionURLResult> {
+/**
+ * Accepts a response from itty-router (or undefined if no route was matched),
+ * and formats it into a result suitable to return to the Lambda service and
+ * subsequently to the client invoking the function url.
+ * 
+ * If no response was provided, an error response is built with the given
+ * fallback HTTP status, defaulting to 404.
+ * 
+ * @param {Response|undefined} response 
+ * @param {number} [fallbackStatus=404] 
+ * @returns {Promise<LambdaFunctionURLResult>}
+ */
+export async function responseToResult(response: Response | undefined): Promise<LambdaFunctionURLResult> {
   try {
     return parseResponseOrError(response ?? error(404, 'Route not found'));
   } catch(err: any) {
@@ -43,7 +63,7 @@ export async function fromResponse(response: Response | undefined): Promise<Lamb
   }
 }
 
-export async function parseResponseOrError(input: any): Promise<LambdaFunctionURLResult> {
+async function parseResponseOrError(input: any): Promise<LambdaFunctionURLResult> {
   const output: LambdaFunctionURLResult = { statusCode: 200, isBase64Encoded: false };
 
   // destructure just what we need

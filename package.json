@@ -21,8 +21,9 @@
   "scripts": {
     "lint": "eslint .",
     "test": "mocha ./test/**/*.test.*js",
-    "tsc": "tsc",
-    "tscw": "tsc -w"
+    "tsc": "npm run tsc-cjs && npm run tsc-esm",
+    "tsc-cjs": "tsc --module commonjs --outDir ./build/cjs/",
+    "tsc-esm": "tsc --module nodenext --outDir ./build/esm/"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",

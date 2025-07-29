@@ -17,7 +17,9 @@ export interface AWSEventMixedHeaders {
 }
 
 /**
- * Combine single and multi value headers
+ * Combine single and multi value headers into one object where each header
+ * may or may not be an array of values.
+ * 
  * ```
  * combineHeaders(
  *   { alpha: 'abc', bravo: 'def', charlie: 'ghi' },
@@ -55,6 +57,9 @@ export function combineHeaders(
 }
 
 /**
+ * Split headers into single and multi value headers, where the former will
+ * contain only single values while the latter may contain arrays of values.
+ * 
  * ```
  * splitHeaders(
  *   { alpha: 'abc', bravo: 'def', charlie: ['uvw', 'wvu'], delta, 'jlk' }
@@ -87,6 +92,9 @@ export function splitHeaders(headers: AWSEventMixedHeaders): {
 }
 
 /**
+ * Combine single and multi value query string parameters into a well formed
+ * query string, as produced by the URLSearchParams global.
+ * 
  * ```
  * combineQuery(
  *   { alpha: 'abc', bravo: 'def', charlie: 'ghi' },

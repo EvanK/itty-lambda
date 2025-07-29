@@ -1,7 +1,6 @@
 import { text } from 'node:stream/consumers';
 
 import type {
-  /*LambdaFunctionURLEvent, APIGatewayProxyEvent,*/
   ALBEvent,
   ALBResult
 } from 'aws-lambda';
@@ -12,7 +11,15 @@ import { error } from 'itty-router';
 
 import { combineHeaders, combineQuery, splitHeaders } from './util';
 
-export async function fromEvent(event: ALBEvent): Promise<RequestLike> {
+/**
+ * Accepts an event from an AWS Lambda function invocation by way of an
+ * application load balancer target, and formats it into a request
+ * suitable for routing through itty-router.
+ * 
+ * @param {ALBEvent} event 
+ * @returns {Promise<RequestLike>}
+ */
+export async function eventToRequest(event: ALBEvent): Promise<RequestLike> {
   const output: RequestLike = { method: '', url: '' };
 
   // combine any single and/or multi value headers
@@ -36,9 +43,21 @@ export async function fromEvent(event: ALBEvent): Promise<RequestLike> {
   return output;
 }
 
-export async function fromResponse(response: Response | undefined): Promise<ALBResult> {
+/**
+ * Accepts a response from itty-router (or undefined if no route was matched),
+ * and formats it into a result suitable to return to the Lambda service and
+ * subsequently to an application load balancer.
+ * 
+ * If no response was provided, an error response is built with the given
+ * fallback HTTP status, defaulting to 404.
+ * 
+ * @param {Response|undefined} response 
+ * @param {number} [fallbackStatus=404] 
+ * @returns {Promise<ALBResult>}
+ */
+export async function responseToResult(response: Response | undefined, fallbackStatus: number = 404): Promise<ALBResult> {
   try {
-    return parseResponseOrError(response ?? error(404, 'Route not found'));
+    return parseResponseOrError(response ?? error(fallbackStatus, 'Response not found'));
   } catch(err: any) {
     return parseResponseOrError(error(err));
   }
@@ -51,8 +70,6 @@ async function parseResponseOrError(input: any): Promise<ALBResult> {
   const { status, headers, body } = input;
 
   output.statusCode = status;
-
-  // const removeUndefs = (obj: object) => Object.keys(obj).forEach(key => obj[key] === undefined && delete obj[key]);
 
   // handle single or multi headers
   const { headers: singleHeaders, multiValueHeaders } = splitHeaders(headers);
