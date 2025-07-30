@@ -60,13 +60,13 @@ export async function eventToRequest(event: ALBEvent): Promise<RequestLike> {
  */
 export async function responseToResult(response: Response | undefined, fallbackStatus: number = 404): Promise<ALBResult> {
   try {
-    return parseResponseOrError(response ?? error(fallbackStatus, 'Response not found'));
+    return await parseResponseOrError(response ?? error(fallbackStatus, 'Response not found'));
   } catch(err: any) {
-    return parseResponseOrError(error(err));
+    return await parseResponseOrError(error(err));
   }
 }
 
-async function parseResponseOrError(input: any): Promise<ALBResult> {
+async function parseResponseOrError(input: Response): Promise<ALBResult> {
   const output: ALBResult = { statusCode: 200, isBase64Encoded: false };
 
   // destructure just what we need
@@ -88,7 +88,9 @@ async function parseResponseOrError(input: any): Promise<ALBResult> {
   }
 
   // un-streamify body as necessary
-  output.body = await text(body);
+  if (body) {
+    output.body = await text(body);
+  }
 
   return output;
 }

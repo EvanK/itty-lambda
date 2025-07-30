@@ -58,15 +58,15 @@ export async function eventToRequest(event: LambdaFunctionURLEvent): Promise<Req
  * @param {number} [fallbackStatus=404] 
  * @returns {Promise<LambdaFunctionURLResult>}
  */
-export async function responseToResult(response: Response | undefined): Promise<LambdaFunctionURLResult> {
+export async function responseToResult(response: Response | undefined, fallbackStatus: number = 404): Promise<LambdaFunctionURLResult> {
   try {
-    return parseResponseOrError(response ?? error(404, 'Route not found'));
+    return await parseResponseOrError(response ?? error(fallbackStatus, 'Response not found'));
   } catch(err: any) {
-    return parseResponseOrError(error(err));
+    return await parseResponseOrError(error(err));
   }
 }
 
-async function parseResponseOrError(input: any): Promise<LambdaFunctionURLResult> {
+async function parseResponseOrError(input: Response): Promise<LambdaFunctionURLResult> {
   const output: LambdaFunctionURLResult = { statusCode: 200, isBase64Encoded: false };
 
   // destructure just what we need
@@ -83,7 +83,9 @@ async function parseResponseOrError(input: any): Promise<LambdaFunctionURLResult
   }
 
   // un-streamify body as necessary
-  output.body = await text(body);
+  if (body) {
+    output.body = await text(body);
+  }
 
   return output;
 }
