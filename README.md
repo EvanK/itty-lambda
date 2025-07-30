@@ -18,8 +18,8 @@ export async function handler (event) {
     router.get('/foo', () => ({ success: true }));
 
     // { path, httpMethod, ... } => { url, method, ... }
-    const request = ag.eventToRequest(event);
-    const response = router.fetch(request, ...args);
+    const request = await ag.eventToRequest(event);
+    const response = await router.fetch(request, ...args);
 
     // { status, headers, body } => { statusCode, body: string, ... }
     return await ag.responseToResult(response);
