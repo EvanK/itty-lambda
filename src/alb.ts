@@ -33,11 +33,14 @@ export async function eventToRequest(event: ALBEvent): Promise<RequestLike> {
   output.url = `${proto}://${host}${path}?${queryString}`;
 
   // and http method
-  output.method = event?.httpMethod ?? '';
+  output.method = event?.httpMethod ?? 'GET';
 
   // base64 decode body, if necessary
-  if (event.isBase64Encoded) {
-    output.body = Buffer.from(event.body ?? '', 'base64').toString('ascii');
+  if (event?.body) {
+    output.body = event?.isBase64Encoded
+      ? Buffer.from(`${event?.body}`, 'base64').toString('ascii')
+      : event?.body
+    ;
   }
 
   return output;

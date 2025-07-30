@@ -33,11 +33,14 @@ export async function eventToRequest(event: LambdaFunctionURLEvent): Promise<Req
   output.url = `${proto}://${host}${path}?${queryString}`;
 
   // and http method
-  output.method = event?.requestContext?.http?.method ?? '';
+  output.method = event?.requestContext?.http?.method ?? 'GET';
 
   // base64 decode body, if necessary
-  if (event.isBase64Encoded) {
-    output.body = Buffer.from(event.body ?? '', 'base64').toString('ascii');
+  if (event?.body) {
+    output.body = event?.isBase64Encoded
+      ? Buffer.from(event?.body ?? '', 'base64').toString('ascii')
+      : event?.body
+    ;
   }
 
   return output;
