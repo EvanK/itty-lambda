@@ -1,0 +1,175 @@
+const { assert } = require('chai');
+
+const { error, json, status, StatusError } = require('itty-router');
+
+const alb = require('itty-lambda/alb');
+
+describe('Application load balancers', function () {
+
+  describe('eventToRequest', function () {
+
+    it('well formed event', async function () {
+      const event = {
+        httpMethod: 'POST',
+        path: '/path/to/resource',
+        queryStringParameters: {
+          query: '1234ABCD',
+        },
+        headers: {
+          accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+          host: 'lambda-alb-123578498.us-east-2.elb.amazonaws.com',
+          'x-forwarded-port': '80',
+          'x-forwarded-proto': 'https',
+        },
+        body: 'eyJ0ZXN0IjoiYm9keSJ9',
+        isBase64Encoded: true,
+      };
+      const req = await alb.eventToRequest(event);
+
+      assert.equal(req.method, 'POST');
+
+      // assembled url
+      assert.equal(req.url, 'https://lambda-alb-123578498.us-east-2.elb.amazonaws.com/path/to/resource?query=1234ABCD')
+
+      // base64 decoded body
+      assert.equal(req.body, '{"test":"body"}');
+
+      assert.equal(req.headers['x-forwarded-port'], '80');
+      assert.include(req.headers['accept'], 'text/html');
+      assert.include(req.headers['accept'], 'application/xhtml+xml');
+      assert.include(req.headers['accept'], '*/*');
+    });
+
+    it('sparse event', async function () {
+      const event = {
+        queryStringParameters: {
+          query: '5678EFGH',
+        },
+        isBase64Encoded: true,
+      };
+      const req = await alb.eventToRequest(event);
+
+      // default method (i _think_ this is correct behaviour)
+      assert.equal(req.method, 'GET');
+
+      // assembled url from mostly defaults
+      assert.equal(req.url, 'http://localhost.localdomain?query=5678EFGH')
+
+      // body not defined, should ignore base64 flag
+      assert.equal(req.body, undefined);
+
+      // empty headers
+      assert.deepEqual(req.headers, {});
+    });
+
+    it('empty event', async function () {
+      const req = await alb.eventToRequest({});
+
+      assert.equal(req.method, 'GET');
+
+      // assembled url from ALL defaults
+      assert.equal(req.url, 'http://localhost.localdomain?')
+
+      assert.equal(req.body, undefined);
+    });
+
+    it('request body w/o base64 encoding', async function () {
+      const body = '{"lorem":"ipsum"}';
+      const req = await alb.eventToRequest({
+        body,
+        isBase64Encoded: false,
+      });
+
+      assert.equal(req.body, body);
+    });
+
+    it('multi value headers and query strings', async function () {
+      const req = await alb.eventToRequest({
+        queryStringParameters: {
+          a: '123zyx',
+          z: '987abc',
+        },
+        multiValueQueryStringParameters: {
+          a: ['456wvu', '789tsr'],
+          b: ['lorem', 'ipsum'],
+        },
+        headers: {
+          accept: 'text/html',
+          'accept-encoding': 'gzip',
+        },
+        multiValueHeaders: {
+          accept: ['application/xml', 'application/json'],
+          'x-forwarded-port': ['80','443']
+        },
+      });
+
+      assert.include(req.url, 'a=123zyx&z=987abc&a=456wvu&a=789tsr&b=lorem&b=ipsum');
+
+      assert.deepEqual(
+        req.headers,
+        {
+          accept: [ 'text/html', 'application/xml', 'application/json' ],
+          'accept-encoding': 'gzip',
+          'x-forwarded-port': [ '80', '443' ]
+        }
+      );
+    });
+
+  });
+
+  describe('responseToResult', function () {
+
+    it('well formed response', async function () {
+      // simple json encoding with addtl status
+      const res = await alb.responseToResult(
+        json({ message: "received" }, { status: 202 })
+      );
+
+      assert.equal(res.statusCode, 202);
+      assert.equal(res.body, '{"message":"received"}');
+    });
+  
+    it('undefined response', async function () {
+      // first, implicit undefined
+      const res1 = await alb.responseToResult();
+
+      assert.equal(res1.statusCode, 404);
+      assert.equal(res1.body, '{"status":404,"error":"Response not found"}');
+
+      // then explicitly with different default status
+      const res = await alb.responseToResult(undefined, 420);
+
+      assert.equal(res.statusCode, 420);
+      assert.equal(res.body, '{"status":420,"error":"Response not found"}');
+    });
+
+    it('status without body', async function () {
+      // feed response with null body
+      const res = await alb.responseToResult(
+        status(301, { headers: { location: '/new/path' } })
+      );
+
+      assert.equal(res.statusCode, 301);
+      assert.equal(res.body, undefined);
+      assert.equal(res.headers.location, '/new/path');
+    });
+
+    it('plain error', async function () {
+      const err = new Error('shit done broke');
+      const res = await alb.responseToResult(error(err));
+
+      assert.equal(res.isBase64Encoded, false);
+      assert.equal(res.body, '{"status":500,"error":"shit done broke"}');
+    });
+
+    it('status error', async function () {
+      const err = new StatusError(418, 'im a little teapot');
+      const res = await alb.responseToResult(error(err));
+
+      assert.equal(res.isBase64Encoded, false);
+      assert.equal(res.body, '{"status":418,"error":"im a little teapot"}');
+    });
+
+  });
+
+});
