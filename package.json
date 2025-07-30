@@ -1,5 +1,24 @@
 {
   "name": "itty-lambda",
+  "version": "0.0.1-alpha.1",
+  "description": "AWS Lambda support for itty-router",
+  "author": "Evan Kaufman <evan@evanskaufman.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EvanK/itty-lambda.git"
+  },
+  "bugs": {
+    "url": "https://github.com/EvanK/itty-lambda/issues"
+  },
+  "homepage": "https://github.com/EvanK/itty-lambda",
+  "keywords": [
+    "itty-router",
+    "router"
+  ],
+  "files": [
+    "build/**/*.js"
+  ],
   "exports": {
     ".": {
       "require": "./build/cjs/index.js",
@@ -32,10 +51,12 @@
     "@types/node": "^24.1.0",
     "chai": "^5.2.1",
     "eslint": "^9.29.0",
-    "itty-router": "^5.0.18",
     "mocha": "^11.7.1",
     "sinon": "^21.0.0",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.34.1"
+  },
+  "dependencies": {
+    "itty-router": "^5.0.20"
   }
 }
