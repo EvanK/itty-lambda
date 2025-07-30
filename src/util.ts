@@ -69,14 +69,15 @@ export function combineHeaders(
  * }
  * ```
  */
-export function splitHeaders(headers: AWSEventMixedHeaders): {
+export function splitHeaders(headers: AWSEventMixedHeaders | Headers): {
   headers: ALBEventHeaders | APIGatewayProxyEventHeaders,
   multiValueHeaders: ALBEventMultiValueHeaders | APIGatewayProxyEventMultiValueHeaders
 } {
   const single: ALBEventHeaders | APIGatewayProxyEventHeaders = {};
   const multi: ALBEventMultiValueHeaders | APIGatewayProxyEventMultiValueHeaders = {};
 
-  for (const [key, value] of Object.entries(headers)) {
+  const entries = headers instanceof Headers ? headers.entries() : Object.entries(headers);
+  for (const [key, value] of entries) {
     if (Array.isArray(value)) {
       multi[key] = value;
       single[key] = value.join(',');
