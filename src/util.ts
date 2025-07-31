@@ -80,7 +80,7 @@ export function combineHeaders(
  * }
  * ```
  */
-export function splitHeaders(headers: Headers): {
+export function splitHeaders(headers: Headers, splitIntoMultiValues = false): {
   headers: ALBEventHeaders | APIGatewayProxyEventHeaders,
   multiValueHeaders: ALBEventMultiValueHeaders | APIGatewayProxyEventMultiValueHeaders
 } {
@@ -88,7 +88,7 @@ export function splitHeaders(headers: Headers): {
   const multi: ALBEventMultiValueHeaders | APIGatewayProxyEventMultiValueHeaders = {};
 
   for (const [key, value] of headers.entries() ) {
-    if (value.includes(',')) {
+    if (splitIntoMultiValues && value.includes(',')) {
       multi[key] = value.split(/\s*,\s*/);
     } else {
       single[key] = value;

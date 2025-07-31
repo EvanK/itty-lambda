@@ -1,6 +1,8 @@
-const { assert } = require('chai');
+const { assert, config: chaiConfig } = require('chai');
 
 const { error, json, status, StatusError } = require('itty-router');
+
+chaiConfig.truncateThreshold = 0;
 
 const alb = require('itty-lambda/alb');
 
@@ -34,10 +36,10 @@ describe('Application load balancers', function () {
       // base64 decoded body
       assert.equal(req.body, '{"test":"body"}');
 
-      assert.equal(req.headers['x-forwarded-port'], '80');
-      assert.include(req.headers['accept'], 'text/html');
-      assert.include(req.headers['accept'], 'application/xhtml+xml');
-      assert.include(req.headers['accept'], '*/*');
+      assert.equal(req.headers.get('x-forwarded-port'), '80');
+      assert.include(req.headers.get('accept'), 'text/html');
+      assert.include(req.headers.get('accept'), 'application/xhtml+xml');
+      assert.include(req.headers.get('accept'), '*/*');
     });
 
     it('sparse event', async function () {
@@ -59,13 +61,18 @@ describe('Application load balancers', function () {
       assert.equal(req.body, undefined);
 
       // empty headers
-      assert.deepEqual(req.headers, {});
+      assert.deepEqual(
+        Array.from(
+          req.headers.entries()
+        ),
+        []
+      );
     });
 
     it('empty event', async function () {
-      const req = await alb.eventToRequest({});
+      const req = await alb.eventToRequest({}, { defaultMethod: 'HEAD' });
 
-      assert.equal(req.method, 'GET');
+      assert.equal(req.method, 'HEAD');
 
       // assembled url from ALL defaults
       assert.equal(req.url, 'http://localhost.localdomain?')
@@ -106,12 +113,14 @@ describe('Application load balancers', function () {
       assert.include(req.url, 'a=123zyx&z=987abc&a=456wvu&a=789tsr&b=lorem&b=ipsum');
 
       assert.deepEqual(
-        req.headers,
-        {
-          accept: [ 'text/html', 'application/xml', 'application/json' ],
-          'accept-encoding': 'gzip',
-          'x-forwarded-port': [ '80', '443' ]
-        }
+        Array.from(
+          req.headers.entries()
+        ),
+        [
+          [ 'accept', 'text/html, application/xml, application/json' ],
+          [ 'accept-encoding', 'gzip' ],
+          [ 'x-forwarded-port', '80, 443' ],
+        ]
       );
     });
 
@@ -137,7 +146,7 @@ describe('Application load balancers', function () {
       assert.equal(res1.body, '{"status":404,"error":"Response not found"}');
 
       // then explicitly with different default status
-      const res = await alb.responseToResult(undefined, 420);
+      const res = await alb.responseToResult(undefined, { fallbackStatus: 420});
 
       assert.equal(res.statusCode, 420);
       assert.equal(res.body, '{"status":420,"error":"Response not found"}');

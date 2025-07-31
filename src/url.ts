@@ -17,9 +17,10 @@ import { combineHeaders, combineQuery, splitHeaders } from './util';
  * itty-router.
  * 
  * @param {LambdaFunctionURLEvent} event 
+ * @param {object} [options]
  * @returns {Promise<RequestLike>}
  */
-export async function eventToRequest(event: LambdaFunctionURLEvent): Promise<RequestLike> {
+export async function eventToRequest(event: LambdaFunctionURLEvent, options = { defaultMethod: 'GET' }): Promise<RequestLike> {
   const output: RequestLike = { method: '', url: '' };
 
   // no multi value headers to muck with here
@@ -33,7 +34,7 @@ export async function eventToRequest(event: LambdaFunctionURLEvent): Promise<Req
   output.url = `${proto}://${host}${path}?${queryString}`;
 
   // and http method
-  output.method = event?.requestContext?.http?.method ?? 'GET';
+  output.method = event?.requestContext?.http?.method ?? options?.defaultMethod ?? 'GET';
 
   // base64 decode body, if necessary
   if (event?.body) {
@@ -55,19 +56,19 @@ export async function eventToRequest(event: LambdaFunctionURLEvent): Promise<Req
  * fallback HTTP status, defaulting to 404.
  * 
  * @param {Response|undefined} response 
- * @param {number} [fallbackStatus=404] 
+ * @param {object} [options] 
  * @returns {Promise<LambdaFunctionURLResult>}
  */
-export async function responseToResult(response: Response | undefined, fallbackStatus: number = 404): Promise<LambdaFunctionURLResult> {
+export async function responseToResult(response: Response | undefined, options = { base64Encode: false, fallbackStatus: 404 }): Promise<LambdaFunctionURLResult> {
   try {
-    return await parseResponseOrError(response ?? error(fallbackStatus, 'Response not found'));
+    return await parseResponseOrError(response ?? error(options?.fallbackStatus ?? 404, 'Response not found'), options);
   } catch(err: any) {
-    return await parseResponseOrError(error(err));
+    return await parseResponseOrError(error(err), options);
   }
 }
 
-async function parseResponseOrError(input: Response): Promise<LambdaFunctionURLResult> {
-  const output: LambdaFunctionURLResult = { statusCode: 200, isBase64Encoded: false };
+async function parseResponseOrError(input: Response, options = { base64Encode: false }): Promise<LambdaFunctionURLResult> {
+  const output: LambdaFunctionURLResult = { statusCode: 200, isBase64Encoded: !!options?.base64Encode };
 
   // destructure just what we need
   const { status, headers, body } = input;
@@ -75,7 +76,7 @@ async function parseResponseOrError(input: Response): Promise<LambdaFunctionURLR
   output.statusCode = status;
 
   // handle single or multi headers
-  const { headers: singleHeaders } = splitHeaders(headers);
+  const { headers: singleHeaders } = splitHeaders(headers, false);
 
   output.headers = {};
   for (const [key, value] of Object.entries(singleHeaders)) {
