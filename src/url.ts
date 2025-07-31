@@ -9,7 +9,7 @@ import type { RequestLike } from 'itty-router';
 
 import { error } from 'itty-router';
 
-import { combineQuery, splitHeaders } from './util';
+import { combineHeaders, combineQuery, splitHeaders } from './util';
 
 /**
  * Accepts an event from an AWS Lambda function invocation by way of a
@@ -23,13 +23,13 @@ export async function eventToRequest(event: LambdaFunctionURLEvent): Promise<Req
   const output: RequestLike = { method: '', url: '' };
 
   // no multi value headers to muck with here
-  output.headers = event?.headers ?? {};
+  output.headers = combineHeaders(event?.headers, undefined);
 
   // assemble well-formed url with sane defaults
   const proto = event?.headers?.['x-forwarded-proto'] ?? 'http';
   const host = event?.headers?.host ?? event?.requestContext?.domainName ?? 'localhost.localdomain';
   const path = event?.rawPath ?? event?.requestContext?.http?.path ?? '';
-  const queryString = event?.rawQueryString ?? combineQuery(event?.queryStringParameters ?? {}, {});
+  const queryString = event?.rawQueryString ?? combineQuery(event?.queryStringParameters, undefined);
   output.url = `${proto}://${host}${path}?${queryString}`;
 
   // and http method

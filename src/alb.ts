@@ -23,13 +23,13 @@ export async function eventToRequest(event: ALBEvent): Promise<RequestLike> {
   const output: RequestLike = { method: '', url: '' };
 
   // combine any single and/or multi value headers
-  output.headers = combineHeaders(event?.headers ?? {}, event?.multiValueHeaders ?? {});
+  output.headers = combineHeaders(event?.headers, event?.multiValueHeaders);
 
   // assemble well-formed url with sane defaults
   const proto = event?.headers?.['x-forwarded-proto'] ?? 'http';
   const host = event?.headers?.host ?? 'localhost.localdomain';
   const path = event?.path ?? '';
-  const queryString = combineQuery(event?.queryStringParameters ?? {}, event?.multiValueQueryStringParameters ?? {});
+  const queryString = combineQuery(event?.queryStringParameters, event?.multiValueQueryStringParameters);
   output.url = `${proto}://${host}${path}?${queryString}`;
 
   // and http method

@@ -12,13 +12,8 @@ import type {
   APIGatewayProxyEventMultiValueQueryStringParameters,
 } from 'aws-lambda';
 
-export interface AWSEventMixedHeaders {
-  [name: string]: string | string[] | undefined;
-}
-
 /**
- * Combine single and multi value headers into one object where each header
- * may or may not be an array of values.
+ * Combine single and multi value headers into standardized Headers instance.
  * 
  * ```
  * combineHeaders(
@@ -33,23 +28,39 @@ export interface AWSEventMixedHeaders {
  * ```
  */
 export function combineHeaders(
-  single: ALBEventHeaders | APIGatewayProxyEventHeaders,
-  multi: ALBEventMultiValueHeaders | APIGatewayProxyEventMultiValueHeaders
-): AWSEventMixedHeaders {
-  // include all single value headers by default
-  const output: AWSEventMixedHeaders = Object.assign({}, single ?? {});
+  single: ALBEventHeaders | APIGatewayProxyEventHeaders | undefined,
+  multi: ALBEventMultiValueHeaders | APIGatewayProxyEventMultiValueHeaders | undefined
+): Headers {
+  const input: { [name: string]: string[] } = {};
 
-  // and all multi value headers that...
-  for (const [key, value] of Object.entries(multi)) {
-    if (undefined === output?.[key]) {
-      output[key] = value;
-    } else {
-      if (Array.isArray(value)) {
-        if (!Array.isArray(output[key])) output[key] = [ output[key] ];
-        for (const v of value) {
-          if (!output[key].includes(v)) output[key].push(v);
+  // add each single value header, wrapped in array
+  if (single) {
+    for (const [key, value] of Object.entries(single)) {
+      if (value) input[key] = [ value ];
+    }
+  }
+
+  // and each multi value header
+  if (multi) {
+    for (const [key, values] of Object.entries(multi)) {
+      if (values) {
+        // merge with any existing arrays of values
+        if (undefined === input?.[key]) {
+          input[key] = values;
+        } else {
+          for (const value of values) {
+            if (!input[key].includes(value)) input[key].push(value);
+          }
         }
       }
+    }
+  }
+
+  // append each normalized array to new Headers instance
+  const output = new Headers();
+  for (const [key, values] of Object.entries(input)) {
+    for (const value of values) {
+      output.append(key, value);
     }
   }
 
@@ -69,23 +80,18 @@ export function combineHeaders(
  * }
  * ```
  */
-export function splitHeaders(headers: AWSEventMixedHeaders | Headers): {
+export function splitHeaders(headers: Headers): {
   headers: ALBEventHeaders | APIGatewayProxyEventHeaders,
   multiValueHeaders: ALBEventMultiValueHeaders | APIGatewayProxyEventMultiValueHeaders
 } {
   const single: ALBEventHeaders | APIGatewayProxyEventHeaders = {};
   const multi: ALBEventMultiValueHeaders | APIGatewayProxyEventMultiValueHeaders = {};
 
-  const entries = headers instanceof Headers ? headers.entries() : Object.entries(headers);
-  for (const [key, value] of entries) {
-    if (Array.isArray(value)) {
-      multi[key] = value;
-      single[key] = value.join(',');
+  for (const [key, value] of headers.entries() ) {
+    if (value.includes(',')) {
+      multi[key] = value.split(/\s*,\s*/);
     } else {
-      if (undefined !== value) {
-        single[key] = value;
-        multi[key] = [ value ];
-      }
+      single[key] = value;
     }
   }
 
@@ -104,22 +110,25 @@ export function splitHeaders(headers: AWSEventMixedHeaders | Headers): {
  * ```
  */
 export function combineQuery(
-  single: ALBEventQueryStringParameters | APIGatewayProxyEventQueryStringParameters,
-  multi: ALBEventMultiValueQueryStringParameters | APIGatewayProxyEventMultiValueQueryStringParameters
+  single: ALBEventQueryStringParameters | APIGatewayProxyEventQueryStringParameters | undefined,
+  multi: ALBEventMultiValueQueryStringParameters | APIGatewayProxyEventMultiValueQueryStringParameters | undefined
 ): string {
   const output = new URLSearchParams();
 
   // include all single value query params by default
-  for (const [key, value] of Object.entries(single)) {
-    if (undefined !== value) output.append(key, value);
+  if (single) {
+    for (const [key, value] of Object.entries(single)) {
+      if (undefined !== value) output.append(key, value);
+    }
   }
 
   // and all multi value query params that don't already contain same value
-  // 
-  for (const [key, value] of Object.entries(multi)) {
-    if (Array.isArray(value)) {
-      for (const v of value) {
-        if (!output.has(key, v)) output.append(key, v);
+  if (multi) {
+    for (const [key, value] of Object.entries(multi)) {
+      if (Array.isArray(value)) {
+        for (const v of value) {
+          if (!output.has(key, v)) output.append(key, v);
+        }
       }
     }
   }
