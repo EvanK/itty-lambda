@@ -14,18 +14,6 @@ import type {
 
 /**
  * Combine single and multi value headers into standardized Headers instance.
- * 
- * ```
- * combineHeaders(
- *   { alpha: 'abc', bravo: 'def', charlie: 'ghi' },
- *   { alpha: ['xyz'], charlie: ['uvw', 'wvu'], delta, ['jlk'] }
- * ) : {
- *   alpha: ['abc', 'xyz'],
- *   bravo: 'def',
- *   charlie: ['uvw', 'wvu'],
- *   delta, 'jlk'
- * }
- * ```
  */
 export function combineHeaders(
   single: ALBEventHeaders | APIGatewayProxyEventHeaders | undefined,
@@ -68,17 +56,7 @@ export function combineHeaders(
 }
 
 /**
- * Split headers into single and multi value headers, where the former will
- * contain only single values while the latter may contain arrays of values.
- * 
- * ```
- * splitHeaders(
- *   { alpha: 'abc', bravo: 'def', charlie: ['uvw', 'wvu'], delta, 'jlk' }
- * ) : {
- *   headers: { alpha: 'abc', bravo: 'def', charlie: 'uvw,wvu', delta, 'jlk' },
- *   multiValueHeaders: { alpha: ['abc'], bravo: ['def'], charlie: ['uvw', 'wvu'], delta, ['jlk'] }
- * }
- * ```
+ * Split headers into single and multi value headers (when explicitly enabled).
  */
 export function splitHeaders(headers: Headers, splitIntoMultiValues = false): {
   headers: ALBEventHeaders | APIGatewayProxyEventHeaders,
