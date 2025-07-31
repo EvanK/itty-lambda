@@ -1,6 +1,6 @@
 const { assert, config: chaiConfig } = require('chai');
 
-const { error, json, status, StatusError } = require('itty-router');
+const { error, json, html, status, StatusError } = require('itty-router');
 
 chaiConfig.truncateThreshold = 0;
 
@@ -161,6 +161,31 @@ describe('Application load balancers', function () {
       assert.equal(res.statusCode, 301);
       assert.equal(res.body, undefined);
       assert.equal(res.headers.location, '/new/path');
+    });
+
+    it('response encoding', async function () {
+      // base64 encode response body
+      const res = await alb.responseToResult(
+        html('howdy'),
+        { base64Encode: true }
+      );
+
+      assert.equal(res.isBase64Encoded, true);
+      assert.equal(res.body, 'aG93ZHk=');
+    });
+
+    it('multivalue headers', async function () {
+      const cookies = [ 'path=/; domain=xyz.com', 'path=/; domain=abc.org; httponly' ];
+      const res = await alb.responseToResult(
+        status(
+          204,
+          { headers: { 'Cookie-set': cookies.join(',') } }
+        ),
+        { multiValueHeaders: true }
+      );
+
+      assert.equal(res.headers['cookie-set'], undefined);
+      assert.deepEqual(res.multiValueHeaders['cookie-set'], cookies);
     });
 
     it('plain error', async function () {

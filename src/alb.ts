@@ -91,6 +91,9 @@ async function parseResponseOrError(input: Response, options = { base64Encode: f
   // un-streamify body as necessary
   if (body) {
     output.body = await text(body);
+    if (options?.base64Encode) {
+      output.body = Buffer.from(output.body, 'utf-8').toString('base64');
+    }
   }
 
   return output;
