@@ -109,5 +109,14 @@
     /* Completeness */
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
+  },
+  "typedocOptions": {
+    "entryPoints": [
+      "src/*.ts",
+      "node_modules/@types/aws-lambda/*.d.ts",
+      "node_modules/@types/node/globals.d.ts",
+      "node_modules/itty-router/types/*.d.ts"
+    ],
+    "out": "docs/typedoc"
   }
 }

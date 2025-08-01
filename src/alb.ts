@@ -9,6 +9,8 @@ import type { RequestLike } from 'itty-router';
 
 import { error } from 'itty-router';
 
+import type { EventOptions, ResponseOptions } from './util'; 
+
 import { combineHeaders, combineQuery, splitHeaders } from './util';
 
 /**
@@ -16,11 +18,10 @@ import { combineHeaders, combineQuery, splitHeaders } from './util';
  * application load balancer target, and formats it into a request
  * suitable for routing through itty-router.
  * 
- * @param {ALBEvent} event 
- * @param {object} [options]
- * @returns {Promise<RequestLike>}
+ * @param event 
+ * @param options
  */
-export async function eventToRequest(event: ALBEvent, options = { defaultMethod: 'GET' }): Promise<RequestLike> {
+export async function eventToRequest(event: ALBEvent, options: EventOptions | undefined): Promise<RequestLike> {
   const output: RequestLike = { method: '', url: '' };
 
   // combine any single and/or multi value headers
@@ -55,20 +56,20 @@ export async function eventToRequest(event: ALBEvent, options = { defaultMethod:
  * If no response was provided, an error response is built with the given
  * fallback HTTP status, defaulting to 404.
  * 
- * @param {Response|undefined} response 
- * @param {object} [options] 
- * @returns {Promise<ALBResult>}
+ * @param response 
+ * @param options 
  */
-export async function responseToResult(response: Response | undefined, options = { base64Encode: false, fallbackStatus: 404, multiValueHeaders: false }): Promise<ALBResult> {
+export async function responseToResult(response: Response | undefined, options: ResponseOptions | undefined): Promise<ALBResult> {
+  options = Object.assign({ base64Encode: false, fallbackStatus: 404, multiValueHeaders: false }, options);
   try {
-    return await parseResponseOrError(response ?? error(options?.fallbackStatus ?? 404, 'Response not found'), options);
+    return await parseResponseOrError(response ?? error(options.fallbackStatus, 'Response not found'), options);
   } catch(err: any) {
     return await parseResponseOrError(error(err), options);
   }
 }
 
-async function parseResponseOrError(input: Response, options = { base64Encode: false, multiValueHeaders: false }): Promise<ALBResult> {
-  const output: ALBResult = { statusCode: 200, isBase64Encoded: !!options?.base64Encode };
+async function parseResponseOrError(input: Response, options: ResponseOptions): Promise<ALBResult> {
+  const output: ALBResult = { statusCode: 200, isBase64Encoded: !!options.base64Encode };
 
   // destructure just what we need
   const { status, headers, body } = input;
@@ -76,7 +77,7 @@ async function parseResponseOrError(input: Response, options = { base64Encode: f
   output.statusCode = status;
 
   // handle single or multi headers
-  const { headers: singleHeaders, multiValueHeaders } = splitHeaders(headers, options?.multiValueHeaders);
+  const { headers: singleHeaders, multiValueHeaders } = splitHeaders(headers, options.multiValueHeaders);
 
   output.headers = {};
   for (const [key, value] of Object.entries(singleHeaders)) {
@@ -91,7 +92,7 @@ async function parseResponseOrError(input: Response, options = { base64Encode: f
   // un-streamify body as necessary
   if (body) {
     output.body = await text(body);
-    if (options?.base64Encode) {
+    if (options.base64Encode) {
       output.body = Buffer.from(output.body, 'utf-8').toString('base64');
     }
   }

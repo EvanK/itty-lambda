@@ -9,6 +9,8 @@ import type { RequestLike } from 'itty-router';
 
 import { error } from 'itty-router';
 
+import type { EventOptions, ResponseOptions } from './util'; 
+
 import { combineHeaders, combineQuery, splitHeaders } from './util';
 
 /**
@@ -16,11 +18,10 @@ import { combineHeaders, combineQuery, splitHeaders } from './util';
  * function url, and formats it into a request suitable for routing through
  * itty-router.
  * 
- * @param {LambdaFunctionURLEvent} event 
- * @param {object} [options]
- * @returns {Promise<RequestLike>}
+ * @param event 
+ * @param options
  */
-export async function eventToRequest(event: LambdaFunctionURLEvent, options = { defaultMethod: 'GET' }): Promise<RequestLike> {
+export async function eventToRequest(event: LambdaFunctionURLEvent, options: EventOptions | undefined): Promise<RequestLike> {
   const output: RequestLike = { method: '', url: '' };
 
   // no multi value headers to muck with here
@@ -55,27 +56,27 @@ export async function eventToRequest(event: LambdaFunctionURLEvent, options = { 
  * If no response was provided, an error response is built with the given
  * fallback HTTP status, defaulting to 404.
  * 
- * @param {Response|undefined} response 
- * @param {object} [options] 
- * @returns {Promise<LambdaFunctionURLResult>}
+ * @param response 
+ * @param options 
  */
-export async function responseToResult(response: Response | undefined, options = { base64Encode: false, fallbackStatus: 404 }): Promise<LambdaFunctionURLResult> {
+export async function responseToResult(response: Response | undefined, options: ResponseOptions | undefined): Promise<LambdaFunctionURLResult> {
+  options = Object.assign({ base64Encode: false, fallbackStatus: 404, multiValueHeaders: false }, options);
   try {
-    return await parseResponseOrError(response ?? error(options?.fallbackStatus ?? 404, 'Response not found'), options);
+    return await parseResponseOrError(response ?? error(options.fallbackStatus, 'Response not found'), options);
   } catch(err: any) {
     return await parseResponseOrError(error(err), options);
   }
 }
 
-async function parseResponseOrError(input: Response, options = { base64Encode: false }): Promise<LambdaFunctionURLResult> {
-  const output: LambdaFunctionURLResult = { statusCode: 200, isBase64Encoded: !!options?.base64Encode };
+async function parseResponseOrError(input: Response, options: ResponseOptions): Promise<LambdaFunctionURLResult> {
+  const output: LambdaFunctionURLResult = { statusCode: 200, isBase64Encoded: !!options.base64Encode };
 
   // destructure just what we need
   const { status, headers, body } = input;
 
   output.statusCode = status;
 
-  // handle single or multi headers
+  // lambda function urls don't support multi headers
   const { headers: singleHeaders } = splitHeaders(headers, false);
 
   output.headers = {};
@@ -86,6 +87,9 @@ async function parseResponseOrError(input: Response, options = { base64Encode: f
   // un-streamify body as necessary
   if (body) {
     output.body = await text(body);
+    if (options.base64Encode) {
+      output.body = Buffer.from(output.body, 'utf-8').toString('base64');
+    }
   }
 
   return output;

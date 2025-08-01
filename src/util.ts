@@ -12,6 +12,28 @@ import type {
   APIGatewayProxyEventMultiValueQueryStringParameters,
 } from 'aws-lambda';
 
+export interface EventOptions {
+  /**
+   * @defaultValue `GET`
+   */
+  defaultMethod: string;
+}
+
+export interface ResponseOptions {
+  /**
+   * @defaultValue `false`
+   */
+  base64Encode: boolean;
+  /**
+   * @defaultValue `404`
+   */
+  fallbackStatus: number;
+  /**
+   * @defaultValue `false`
+   */
+  multiValueHeaders: boolean;
+}
+
 /**
  * Combine single and multi value headers into standardized Headers instance.
  */

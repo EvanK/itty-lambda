@@ -38,6 +38,7 @@
     }
   },
   "scripts": {
+    "docs": "typedoc",
     "link": "npm link && npm link itty-lambda",
     "lint": "eslint ./src/",
     "test": "mocha ./test/**/*.test.*js",
@@ -53,6 +54,7 @@
     "eslint": "^9.29.0",
     "mocha": "^11.7.1",
     "sinon": "^21.0.0",
+    "typedoc": "^0.28.8",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.34.1"
   },
