@@ -11,7 +11,10 @@ import { error } from 'itty-router';
 
 import type { EventOptions, ResponseOptions } from './util'; 
 
-import { combineHeaders, combineQuery, splitHeaders } from './util';
+import {
+  eventToRequest as commonEventToRequest,
+  headersToObjects,
+} from './util';
 
 /**
  * Accepts an event from an AWS Lambda function invocation by way of a
@@ -22,30 +25,7 @@ import { combineHeaders, combineQuery, splitHeaders } from './util';
  * @param options
  */
 export async function eventToRequest(event: LambdaFunctionURLEvent, options: EventOptions | undefined): Promise<RequestLike> {
-  const output: RequestLike = { method: '', url: '' };
-
-  // no multi value headers to muck with here
-  output.headers = combineHeaders(event?.headers, undefined);
-
-  // assemble well-formed url with sane defaults
-  const proto = event?.headers?.['x-forwarded-proto'] ?? 'http';
-  const host = event?.headers?.host ?? event?.requestContext?.domainName ?? 'localhost.localdomain';
-  const path = event?.rawPath ?? event?.requestContext?.http?.path ?? '';
-  const queryString = event?.rawQueryString ?? combineQuery(event?.queryStringParameters, undefined);
-  output.url = `${proto}://${host}${path}?${queryString}`;
-
-  // and http method
-  output.method = event?.requestContext?.http?.method ?? options?.defaultMethod ?? 'GET';
-
-  // base64 decode body, if necessary
-  if (event?.body) {
-    output.body = event?.isBase64Encoded
-      ? Buffer.from(event?.body ?? '', 'base64').toString('ascii')
-      : event?.body
-    ;
-  }
-
-  return output;
+  return await commonEventToRequest(event, options);
 }
 
 /**
@@ -77,7 +57,7 @@ async function parseResponseOrError(input: Response, options: ResponseOptions): 
   output.statusCode = status;
 
   // lambda function urls don't support multi headers
-  const { headers: singleHeaders } = splitHeaders(headers, false);
+  const { headers: singleHeaders } = headersToObjects(headers, false);
 
   output.headers = {};
   for (const [key, value] of Object.entries(singleHeaders)) {

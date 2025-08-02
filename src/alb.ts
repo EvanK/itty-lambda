@@ -11,7 +11,10 @@ import { error } from 'itty-router';
 
 import type { EventOptions, ResponseOptions } from './util'; 
 
-import { combineHeaders, combineQuery, splitHeaders } from './util';
+import {
+  eventToRequest as commonEventToRequest,
+  headersToObjects,
+} from './util';
 
 /**
  * Accepts an event from an AWS Lambda function invocation by way of an
@@ -22,30 +25,7 @@ import { combineHeaders, combineQuery, splitHeaders } from './util';
  * @param options
  */
 export async function eventToRequest(event: ALBEvent, options: EventOptions | undefined): Promise<RequestLike> {
-  const output: RequestLike = { method: '', url: '' };
-
-  // combine any single and/or multi value headers
-  output.headers = combineHeaders(event?.headers, event?.multiValueHeaders);
-
-  // assemble well-formed url with sane defaults
-  const proto = event?.headers?.['x-forwarded-proto'] ?? 'http';
-  const host = event?.headers?.host ?? 'localhost.localdomain';
-  const path = event?.path ?? '';
-  const queryString = combineQuery(event?.queryStringParameters, event?.multiValueQueryStringParameters);
-  output.url = `${proto}://${host}${path}?${queryString}`;
-
-  // and http method
-  output.method = event?.httpMethod ?? options?.defaultMethod ?? 'GET';
-
-  // base64 decode body, if necessary
-  if (event?.body) {
-    output.body = event?.isBase64Encoded
-      ? Buffer.from(`${event?.body}`, 'base64').toString('ascii')
-      : event?.body
-    ;
-  }
-
-  return output;
+  return await commonEventToRequest(event, options);
 }
 
 /**
@@ -77,7 +57,7 @@ async function parseResponseOrError(input: Response, options: ResponseOptions): 
   output.statusCode = status;
 
   // handle single or multi headers
-  const { headers: singleHeaders, multiValueHeaders } = splitHeaders(headers, options.multiValueHeaders);
+  const { headers: singleHeaders, multiValueHeaders } = headersToObjects(headers, options.multiValueHeaders);
 
   output.headers = {};
   for (const [key, value] of Object.entries(singleHeaders)) {
