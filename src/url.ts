@@ -41,3 +41,8 @@ export async function responseToResult(response: Response | undefined, options: 
     (await commonResponseToResult(RoutingMode.Url, response, options)) as LambdaFunctionURLResult
   );
 }
+
+export default {
+  eventToRequest,
+  responseToResult,
+}

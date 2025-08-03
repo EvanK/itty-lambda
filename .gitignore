@@ -1,3 +1,4 @@
+.nyc_ouput/
 build/
 docs/typedoc/
 node_modules/

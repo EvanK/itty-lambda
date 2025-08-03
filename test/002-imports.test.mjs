@@ -8,10 +8,10 @@ describe('ESM exports', function () {
   it('top level default export', async function () {
     const ittyLambda = await import('itty-lambda');
 
-    // assert.property(ittyLambda, 'ag');
+    assert.property(ittyLambda, 'ag');
 
-    // assert.equal(ittyLambda.ag.eventToRequest.constructor.name, 'AsyncFunction');
-    // assert.equal(ittyLambda.ag.responseToResult.constructor.name, 'AsyncFunction');
+    assert.equal(ittyLambda.ag.eventToRequest.constructor.name, 'AsyncFunction');
+    assert.equal(ittyLambda.ag.responseToResult.constructor.name, 'AsyncFunction');
 
     assert.property(ittyLambda, 'alb');
 
@@ -26,9 +26,9 @@ describe('ESM exports', function () {
 
   it('implementation specific exports', async function () {
 
-    // const ittyLambdaAg = await import('itty-lambda/ag');
-    // assert.equal(ittyLambdaAg.eventToRequest.constructor.name, 'AsyncFunction');
-    // assert.equal(ittyLambdaAg.responseToResult.constructor.name, 'AsyncFunction');
+    const ittyLambdaAg = await import('itty-lambda/ag');
+    assert.equal(ittyLambdaAg.eventToRequest.constructor.name, 'AsyncFunction');
+    assert.equal(ittyLambdaAg.responseToResult.constructor.name, 'AsyncFunction');
 
     const ittyLambdaAlb = await import('itty-lambda/alb');
     assert.equal(ittyLambdaAlb.eventToRequest.constructor.name, 'AsyncFunction');

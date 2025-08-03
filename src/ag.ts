@@ -41,3 +41,8 @@ export async function responseToResult(response: Response | undefined, options: 
     (await commonResponseToResult(RoutingMode.Ag, response, options)) as APIGatewayProxyResult
   );
 }
+
+export default {
+  eventToRequest,
+  responseToResult,
+}

@@ -1,12 +1,12 @@
-const { assert, config: chaiConfig } = require('chai');
+import { assert, config as chaiConfig } from 'chai';
 
-const { error, json, html, status, StatusError } = require('itty-router');
+import { error, json, html, status, StatusError } from 'itty-router';
 
 chaiConfig.truncateThreshold = 0;
 
-const alb = require('itty-lambda/alb');
+import alb from 'itty-lambda/alb';
 
-describe('Application load balancers (CJS)', function () {
+describe('Application load balancers (ESM)', function () {
 
   describe('eventToRequest', function () {
 

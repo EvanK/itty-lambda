@@ -1,11 +1,11 @@
 // API Gateways
-import * as ag from './ag';
+import ag from './ag';
 
 // Application Load Balancers
-import * as alb from './alb';
+import alb from './alb';
 
 // Lambda function urls
-import * as url from './url';
+import url from './url';
 
 /**
  * Each implements the following functions:

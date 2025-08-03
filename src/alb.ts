@@ -41,3 +41,8 @@ export async function responseToResult(response: Response | undefined, options: 
     (await commonResponseToResult(RoutingMode.Alb, response, options)) as ALBResult
   );
 }
+
+export default {
+  eventToRequest,
+  responseToResult,
+}

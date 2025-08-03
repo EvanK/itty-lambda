@@ -8,10 +8,10 @@ describe('CJS exports', function () {
   it('top level default export', async function () {
     const ittyLambda = require('itty-lambda');
 
-    // assert.property(ittyLambda, 'ag');
+    assert.property(ittyLambda, 'ag');
 
-    // assert.equal(ittyLambda.ag.eventToRequest.constructor.name, 'AsyncFunction');
-    // assert.equal(ittyLambda.ag.responseToResult.constructor.name, 'AsyncFunction');
+    assert.equal(ittyLambda.ag.eventToRequest.constructor.name, 'AsyncFunction');
+    assert.equal(ittyLambda.ag.responseToResult.constructor.name, 'AsyncFunction');
 
     assert.property(ittyLambda, 'alb');
 
@@ -26,10 +26,10 @@ describe('CJS exports', function () {
 
   it('implementation specific exports', async function () {
 
-    // const ittyLambdaAg = require('itty-lambda/ag');
+    const ittyLambdaAg = require('itty-lambda/ag');
 
-    // assert.equal(ittyLambdaAg.eventToRequest.constructor.name, 'AsyncFunction');
-    // assert.equal(ittyLambdaAg.responseToResult.constructor.name, 'AsyncFunction');
+    assert.equal(ittyLambdaAg.eventToRequest.constructor.name, 'AsyncFunction');
+    assert.equal(ittyLambdaAg.responseToResult.constructor.name, 'AsyncFunction');
 
     const ittyLambdaAlb = require('itty-lambda/alb');
 

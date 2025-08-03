@@ -1,12 +1,12 @@
-const { assert, config: chaiConfig } = require('chai');
+import { assert, config as chaiConfig } from 'chai';
 
-const { error, json, html, status, StatusError } = require('itty-router');
+import { error, json, html, status, StatusError } from 'itty-router';
 
 chaiConfig.truncateThreshold = 0;
 
-const alb = require('itty-lambda/alb');
+import ag from 'itty-lambda/ag';
 
-describe('Application load balancers (CJS)', function () {
+describe('API gateway (ESM)', function () {
 
   describe('eventToRequest', function () {
 
@@ -26,7 +26,7 @@ describe('Application load balancers (CJS)', function () {
         body: 'eyJ0ZXN0IjoiYm9keSJ9',
         isBase64Encoded: true,
       };
-      const req = await alb.eventToRequest(event);
+      const req = await ag.eventToRequest(event);
 
       assert.equal(req.method, 'POST');
 
@@ -41,6 +41,11 @@ describe('Application load balancers (CJS)', function () {
       assert.include(req.headers.get('accept'), 'application/xhtml+xml');
       assert.include(req.headers.get('accept'), '*/*');
     });
+    /** TODO:
+     * - multi value headers
+     * - (and query string params)
+     * - 
+     */
 
     it('sparse event', async function () {
       const event = {
@@ -49,7 +54,7 @@ describe('Application load balancers (CJS)', function () {
         },
         isBase64Encoded: true,
       };
-      const req = await alb.eventToRequest(event);
+      const req = await ag.eventToRequest(event);
 
       // default method (i _think_ this is correct behaviour)
       assert.equal(req.method, 'GET');
@@ -70,7 +75,7 @@ describe('Application load balancers (CJS)', function () {
     });
 
     it('empty event', async function () {
-      const req = await alb.eventToRequest({}, { defaultMethod: 'HEAD' });
+      const req = await ag.eventToRequest({}, { defaultMethod: 'HEAD' });
 
       assert.equal(req.method, 'HEAD');
 
@@ -82,7 +87,7 @@ describe('Application load balancers (CJS)', function () {
 
     it('request body w/o base64 encoding', async function () {
       const body = '{"lorem":"ipsum"}';
-      const req = await alb.eventToRequest({
+      const req = await ag.eventToRequest({
         body,
         isBase64Encoded: false,
       });
@@ -91,7 +96,7 @@ describe('Application load balancers (CJS)', function () {
     });
 
     it('multi value headers and query strings', async function () {
-      const req = await alb.eventToRequest({
+      const req = await ag.eventToRequest({
         queryStringParameters: {
           a: '123zyx',
           z: '987abc',
@@ -130,7 +135,7 @@ describe('Application load balancers (CJS)', function () {
 
     it('well formed response', async function () {
       // simple json encoding with addtl status
-      const res = await alb.responseToResult(
+      const res = await ag.responseToResult(
         json({ message: "received" }, { status: 202 })
       );
 
@@ -140,13 +145,13 @@ describe('Application load balancers (CJS)', function () {
   
     it('undefined response', async function () {
       // first, implicit undefined
-      const res1 = await alb.responseToResult();
+      const res1 = await ag.responseToResult();
 
       assert.equal(res1.statusCode, 404);
       assert.equal(res1.body, '{"status":404,"error":"Response not found"}');
 
       // then explicitly with different default status
-      const res = await alb.responseToResult(undefined, { fallbackStatus: 420});
+      const res = await ag.responseToResult(undefined, { fallbackStatus: 420});
 
       assert.equal(res.statusCode, 420);
       assert.equal(res.body, '{"status":420,"error":"Response not found"}');
@@ -154,18 +159,18 @@ describe('Application load balancers (CJS)', function () {
 
     it('status without body', async function () {
       // feed response with null body
-      const res = await alb.responseToResult(
+      const res = await ag.responseToResult(
         status(301, { headers: { location: '/new/path' } })
       );
 
       assert.equal(res.statusCode, 301);
-      assert.equal(res.body, undefined);
+      assert.equal(res.body, '');
       assert.equal(res.headers.location, '/new/path');
     });
 
     it('response encoding', async function () {
       // base64 encode response body
-      const res = await alb.responseToResult(
+      const res = await ag.responseToResult(
         html('howdy'),
         { base64Encode: true }
       );
@@ -176,7 +181,7 @@ describe('Application load balancers (CJS)', function () {
 
     it('multivalue headers', async function () {
       const cookies = [ 'path=/; domain=xyz.com', 'path=/; domain=abc.org; httponly' ];
-      const res = await alb.responseToResult(
+      const res = await ag.responseToResult(
         status(
           204,
           { headers: { 'Cookie-set': cookies.join(',') } }
@@ -190,7 +195,7 @@ describe('Application load balancers (CJS)', function () {
 
     it('plain error', async function () {
       const err = new Error('shit done broke');
-      const res = await alb.responseToResult(error(err));
+      const res = await ag.responseToResult(error(err));
 
       assert.equal(res.isBase64Encoded, false);
       assert.equal(res.body, '{"status":500,"error":"shit done broke"}');
@@ -198,7 +203,7 @@ describe('Application load balancers (CJS)', function () {
 
     it('status error', async function () {
       const err = new StatusError(418, 'im a little teapot');
-      const res = await alb.responseToResult(error(err));
+      const res = await ag.responseToResult(error(err));
 
       assert.equal(res.isBase64Encoded, false);
       assert.equal(res.body, '{"status":418,"error":"im a little teapot"}');

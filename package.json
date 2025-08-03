@@ -41,7 +41,7 @@
     "docs": "typedoc",
     "link": "npm link && npm link itty-lambda",
     "lint": "eslint ./src/",
-    "test": "mocha ./test/**/*.test.*js",
+    "test": "nyc mocha ./test/**/*.test.*js",
     "tsc": "npm run tsc-cjs && npm run tsc-esm",
     "tsc-cjs": "tsc --module commonjs --outDir ./build/cjs/",
     "tsc-esm": "tsc --module nodenext --outDir ./build/esm/"
@@ -53,6 +53,7 @@
     "chai": "^5.2.1",
     "eslint": "^9.29.0",
     "mocha": "^11.7.1",
+    "nyc": "^17.1.0",
     "sinon": "^21.0.0",
     "typedoc": "^0.28.8",
     "typescript": "^5.8.3",

@@ -6,7 +6,7 @@ chaiConfig.truncateThreshold = 0;
 
 const url = require('itty-lambda/url');
 
-describe('Lambda function urls', function () {
+describe('Lambda function urls (CJS)', function () {
 
   describe('eventToRequest', function () {
 

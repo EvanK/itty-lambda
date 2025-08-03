@@ -6,7 +6,7 @@ chaiConfig.truncateThreshold = 0;
 
 const ag = require('itty-lambda/ag');
 
-describe('API gateway', function () {
+describe('API gateway (CJS)', function () {
 
   describe('eventToRequest', function () {
 
