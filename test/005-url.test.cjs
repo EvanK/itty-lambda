@@ -6,7 +6,7 @@ chaiConfig.truncateThreshold = 0;
 
 const url = require('itty-lambda/url');
 
-describe('API gateway', function () {
+describe('Lambda function urls', function () {
 
   describe('eventToRequest', function () {
 
@@ -48,11 +48,6 @@ describe('API gateway', function () {
       assert.include(req.headers.get('accept'), 'application/xhtml+xml');
       assert.include(req.headers.get('accept'), '*/*');
     });
-    /** TODO:
-     * - multi value headers
-     * - (and query string params)
-     * - 
-     */
 
     it('sparse event', async function () {
       const event = {
@@ -102,7 +97,19 @@ describe('API gateway', function () {
       assert.equal(req.body, body);
     });
 
-    it.skip('multi value headers/querystrings not supported by func urls');
+    it('multi value headers/querystrings not supported by func urls', async function () {
+      const req = await url.eventToRequest({
+        headers: {
+          'Accept': 'text/html'
+        },
+        // we shouldn't have these for a function url
+        multiValueHeaders: {
+          'Accept': ['text/plain', 'application/json', 'application/xml']
+        }
+      });
+
+      assert.equal(req.headers.get('accept'), 'text/html');
+    });
 
   });
 
