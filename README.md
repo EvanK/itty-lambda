@@ -44,6 +44,7 @@ export async function handler (event) {
 }
 ```
 
+Each implementation provides these two named exports, for you to plug in before and after routing...
 
 ## eventToRequest
 
@@ -51,16 +52,16 @@ Accepts an AWS Lambda event for the invocation type, and resolves to a well form
 
 ```ts
 eventToRequest(
-    event: LambdaFunctionURLEvent | APIGatewayProxyEvent | ALBEvent,
-    options: EventOptions
+    event: APIGatewayProxyEvent | ALBEvent | LambdaFunctionURLEvent,
+    options: EventOptions | undefined
 ) : Promise<RequestLike>
 ```
 
 ### EventOptions
 
-| Name              | Type(s)    | Default Value | Description                             |
-| --                | --         | --            | --                                      |
-| **defaultMethod** | `string`   | `GET`         | HTTP method if none provided from event |
+| Name | Type(s) | Default Value | Description |
+| -- | -- | -- | -- |
+| **defaultMethod** | `string` | `GET` | HTTP method if none provided from event |
 
 
 ## responseToResult
@@ -69,18 +70,18 @@ Accepts a router `Response`, and resolves to a result for the invocation type.
 
 ```ts
 responseToResult(
-    response: Response,
-    options : ResponseOptions
-) : Promise<LambdaFunctionURLResult | APIGatewayProxyResult | ALBResult>
+    response: Response | undefined,
+    options : ResponseOptions | undefined
+) : Promise<APIGatewayProxyResult | ALBResult | LambdaFunctionURLResult>
 ```
 
 ### ResponseOptions
 
-| Name                  | Type(s)   | Default Value | Description                                 |
-| --                    | --        | --            | --                                          |
-| **base64Encode**      | `boolean` | `false`       | Encode response body                        |
-| **fallbackStatus**    | `number`  | `404`         | Status if no response provided from router  |
-| **multiValueHeaders** | `boolean` | `false`       | Split response headers with multiple values |
+| Name | Type(s) | Default Value | Description |
+| -- | -- | -- | -- |
+| **base64Encode** | `boolean` | `false` | Encode response body |
+| **fallbackStatus** | `number` | `404` | Status if no response provided from router |
+| **multiValueHeaders** | `boolean` | `false` | Split response headers with multiple values |
 
 
 <!-- footnotes and urls -->
