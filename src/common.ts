@@ -64,7 +64,7 @@ export async function eventToRequest(
   output.headers = objectsToHeaders(
     event?.headers,
     // account for lambda function urls not supporting multi values
-    ('multiValueHeaders' in event) ? event.multiValueHeaders : undefined
+    (mode != RoutingMode.Url ? (event as APIGatewayProxyEvent | ALBEvent).multiValueHeaders : undefined)
   );
 
   // infer protocol from headers when available
@@ -75,8 +75,8 @@ export async function eventToRequest(
 
   // infer host when available
   const host = (
-      // ag ur url may have domain name
-      ('requestContext' in event && 'domainName' in event.requestContext) ? event.requestContext.domainName : undefined
+      // ag or url may have requestContext.domainName
+      (mode != RoutingMode.Alb ? (event as APIGatewayProxyEvent | LambdaFunctionURLEvent).requestContext?.domainName : undefined)
     )
     ?? output.headers.get('host')
     ?? output.headers.get('x-forwarded-host')
@@ -87,19 +87,19 @@ export async function eventToRequest(
   // infer path when available
   const path = (
       // ag or alb may have path
-      ('path' in event) ? event.path : undefined
+      (mode != RoutingMode.Url ? (event as APIGatewayProxyEvent | ALBEvent).path : undefined)
     )
     ?? (
       // url may have rawPath
-      ('rawPath' in event) ? event.rawPath : undefined
+      (mode == RoutingMode.Url ? (event as LambdaFunctionURLEvent).rawPath : undefined)
     )
     ?? (
-      // alb may have requestContext.path
-      ('requestContext' in event && 'path' in event.requestContext) ? event.requestContext.path : undefined
+      // ag may have requestContext.path
+      (mode == RoutingMode.Ag ? (event as APIGatewayProxyEvent).requestContext?.path : undefined)
     )
     ?? (
       // url may have requestContext.http.path
-      ('requestContext' in event && 'http' in event.requestContext && 'path' in event.requestContext.http) ? event.requestContext.http.path : undefined
+      (mode == RoutingMode.Url ? (event as LambdaFunctionURLEvent).requestContext?.http?.path : undefined)
     )
     ?? ''
   ;
@@ -107,13 +107,13 @@ export async function eventToRequest(
   // infer querystring and convert to string as necessary
   const queryString = (
       // url may have rawQueryString
-      ('rawQueryString' in event) ? event.rawQueryString : undefined
+      (mode == RoutingMode.Url ? (event as LambdaFunctionURLEvent).rawQueryString : undefined)
     )
     ?? objectsToQueryString(
       event?.queryStringParameters,
       (
         // ag or alb may have multiValueQueryStringParameters
-        ('multiValueQueryStringParameters' in event) ? event.multiValueQueryStringParameters : undefined
+        (mode != RoutingMode.Url ? (event as APIGatewayProxyEvent | ALBEvent).multiValueQueryStringParameters : undefined)
       )
     )
   ;
@@ -125,15 +125,15 @@ export async function eventToRequest(
   output.method =
     (
       // ag or alb may have httpMethod
-      ('httpMethod' in event) ? event.httpMethod : undefined
+      (mode != RoutingMode.Url ? (event as APIGatewayProxyEvent | ALBEvent).httpMethod : undefined)
     )
     ?? (
       // ag may have requestContext.httpMethod
-      ('requestContext' in event && 'httpMethod' in event.requestContext) ? event.requestContext.httpMethod : undefined
+      (mode != RoutingMode.Ag ? (event as APIGatewayProxyEvent).requestContext?.httpMethod : undefined)
     )
     ?? (
       // url may have requestContext.http.method
-      ('requestContext' in event && 'http' in event.requestContext && 'method' in event.requestContext.http) ? event.requestContext.http.method : undefined
+      (mode == RoutingMode.Url ? (event as LambdaFunctionURLEvent).requestContext?.http?.method : undefined)
     )
     ?? options?.defaultMethod
     ?? 'GET'
