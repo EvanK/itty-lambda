@@ -11,9 +11,9 @@ This library aims to maintain support for running [itty-router] in any such envi
 ## Example
 
 ```js
-const { url, ag, alb } = require('itty-lambda');
-// CJS -or- ESM
-import { url, ag, alb } from 'itty-lambda';
+// supports CJS -or- ESM
+// const { url, ag, alb } = require('itty-lambda');
+// import { url, ag, alb } from 'itty-lambda';
 
 // for just API Gateway support, use 'itty-lambda/ag'
 // for just Application Load Balancer support, use 'itty-lambda/alb'
@@ -22,7 +22,7 @@ import { url, ag, alb } from 'itty-lambda';
 import { AutoRouter } from 'itty-router';
 
 // using an app load balancer...
-const { eventToRequest, responseToResult } = alb;
+import { eventToRequest, responseToResult } from 'itty-lambda/alb';
 
 export async function handler (event) {
     const router = AutoRouter();
@@ -38,7 +38,7 @@ export async function handler (event) {
     const result = await responseToResult(response);
     // { status: number, headers: Headers, body: ReadableStream, ... }
     // ->
-    // { statusCode: number, body: string, headers: object ... }
+    // { statusCode: number, body: string, headers: object, ... }
 
     return result;
 }

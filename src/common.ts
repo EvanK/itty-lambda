@@ -48,12 +48,14 @@ export interface ResponseOptions {
   multiValueHeaders: boolean;
 }
 
+/** @ignore */
 export enum RoutingMode {
   Ag = 'api-gateway',
   Alb = 'application-load-balancer',
   Url = 'lambda-function-url',
 }
 
+/** @ignore */
 export async function eventToRequest(
   mode: RoutingMode,
   event: APIGatewayProxyEvent | ALBEvent | LambdaFunctionURLEvent,
@@ -150,6 +152,7 @@ export async function eventToRequest(
   return output;
 }
 
+/** @ignore */
 export async function responseToResult(mode: RoutingMode, response: Response | undefined, options: ResponseOptions | undefined): Promise<APIGatewayProxyResult | ALBResult | LambdaFunctionURLResult> {
   options = Object.assign({ base64Encode: false, fallbackStatus: 404, multiValueHeaders: false }, options);
 

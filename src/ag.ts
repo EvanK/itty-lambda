@@ -42,6 +42,7 @@ export async function responseToResult(response: Response | undefined, options: 
   );
 }
 
+/** @ignore */
 export default {
   eventToRequest,
   responseToResult,
