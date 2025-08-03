@@ -1,6 +1,6 @@
 import type {
-  ALBEvent,
-  ALBResult,
+  APIGatewayProxyEvent,
+  APIGatewayProxyResult,
 } from 'aws-lambda';
 
 import type { RequestLike } from 'itty-router';
@@ -15,20 +15,20 @@ import {
 
 /**
  * Accepts an event from an AWS Lambda function invocation by way of an
- * application load balancer target, and formats it into a request
- * suitable for routing through itty-router.
+ * API gateway proxy integration, and formats it into a request suitable
+ * for routing through itty-router.
  * 
  * @param event 
  * @param options
  */
-export async function eventToRequest(event: ALBEvent, options: EventOptions | undefined): Promise<RequestLike> {
-  return await commonEventToRequest(RoutingMode.Alb, event, options);
+export async function eventToRequest(event: APIGatewayProxyEvent, options: EventOptions | undefined): Promise<RequestLike> {
+  return await commonEventToRequest(RoutingMode.Ag, event, options);
 }
 
 /**
  * Accepts a response from itty-router (or undefined if no route was matched),
  * and formats it into a result suitable to return to the Lambda service and
- * subsequently to an application load balancer.
+ * subsequently to an API gateway proxy integration.
  * 
  * If no response was provided, an error response is built with the given
  * fallback HTTP status, defaulting to 404.
@@ -36,8 +36,8 @@ export async function eventToRequest(event: ALBEvent, options: EventOptions | un
  * @param response 
  * @param options 
  */
-export async function responseToResult(response: Response | undefined, options: ResponseOptions): Promise<ALBResult> {
+export async function responseToResult(response: Response | undefined, options: ResponseOptions): Promise<APIGatewayProxyResult> {
   return (
-    (await commonResponseToResult(RoutingMode.Alb, response, options)) as ALBResult
+    (await commonResponseToResult(RoutingMode.Ag, response, options)) as APIGatewayProxyResult
   );
 }
