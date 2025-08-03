@@ -1,20 +1,17 @@
-import { text } from 'node:stream/consumers';
-
 import type {
   ALBEvent,
-  ALBResult
+  ALBResult,
 } from 'aws-lambda';
 
 import type { RequestLike } from 'itty-router';
 
-import { error } from 'itty-router';
-
-import type { EventOptions, ResponseOptions } from './util'; 
+import type { EventOptions, ResponseOptions } from './common'; 
 
 import {
   eventToRequest as commonEventToRequest,
-  headersToObjects,
-} from './util';
+  responseToResult as commonResponseToResult,
+  RoutingMode,
+} from './common';
 
 /**
  * Accepts an event from an AWS Lambda function invocation by way of an
@@ -25,7 +22,7 @@ import {
  * @param options
  */
 export async function eventToRequest(event: ALBEvent, options: EventOptions | undefined): Promise<RequestLike> {
-  return await commonEventToRequest(event, options);
+  return await commonEventToRequest(RoutingMode.Alb, event, options);
 }
 
 /**
@@ -39,43 +36,8 @@ export async function eventToRequest(event: ALBEvent, options: EventOptions | un
  * @param response 
  * @param options 
  */
-export async function responseToResult(response: Response | undefined, options: ResponseOptions | undefined): Promise<ALBResult> {
-  options = Object.assign({ base64Encode: false, fallbackStatus: 404, multiValueHeaders: false }, options);
-  try {
-    return await parseResponseOrError(response ?? error(options.fallbackStatus, 'Response not found'), options);
-  } catch(err: any) {
-    return await parseResponseOrError(error(err), options);
-  }
-}
-
-async function parseResponseOrError(input: Response, options: ResponseOptions): Promise<ALBResult> {
-  const output: ALBResult = { statusCode: 200, isBase64Encoded: !!options.base64Encode };
-
-  // destructure just what we need
-  const { status, headers, body } = input;
-
-  output.statusCode = status;
-
-  // handle single or multi headers
-  const { headers: singleHeaders, multiValueHeaders } = headersToObjects(headers, options.multiValueHeaders);
-
-  output.headers = {};
-  for (const [key, value] of Object.entries(singleHeaders)) {
-    if (undefined !== value) output.headers[key] = value;
-  }
-
-  output.multiValueHeaders = {};
-  for (const [key, value] of Object.entries(multiValueHeaders)) {
-    if (undefined !== value) output.multiValueHeaders[key] = value;
-  }
-
-  // un-streamify body as necessary
-  if (body) {
-    output.body = await text(body);
-    if (options.base64Encode) {
-      output.body = Buffer.from(output.body, 'utf-8').toString('base64');
-    }
-  }
-
-  return output;
+export async function responseToResult(response: Response | undefined, options: ResponseOptions): Promise<ALBResult> {
+  return (
+    (await commonResponseToResult(RoutingMode.Alb, response, options)) as ALBResult
+  );
 }

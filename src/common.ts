@@ -1,7 +1,13 @@
+import { text } from 'node:stream/consumers';
+
 import type {
   ALBEvent,
   APIGatewayProxyEvent,
   LambdaFunctionURLEvent,
+
+  APIGatewayProxyResult,
+  ALBResult,
+  LambdaFunctionURLResult,
 
   ALBEventHeaders,
   ALBEventMultiValueHeaders,
@@ -17,6 +23,8 @@ import type {
 } from 'aws-lambda';
 
 import type { RequestLike } from 'itty-router';
+
+import { error } from 'itty-router';
 
 export interface EventOptions {
   /**
@@ -40,7 +48,14 @@ export interface ResponseOptions {
   multiValueHeaders: boolean;
 }
 
+export enum RoutingMode {
+  Ag = 'api-gateway',
+  Alb = 'application-load-balancer',
+  Url = 'lambda-function-url',
+}
+
 export async function eventToRequest(
+  mode: RoutingMode,
   event: APIGatewayProxyEvent | ALBEvent | LambdaFunctionURLEvent,
   options : EventOptions | undefined
 ): Promise<RequestLike> {
@@ -135,11 +150,76 @@ export async function eventToRequest(
   return output;
 }
 
+export async function responseToResult(mode: RoutingMode, response: Response | undefined, options: ResponseOptions | undefined): Promise<APIGatewayProxyResult | ALBResult | LambdaFunctionURLResult> {
+  options = Object.assign({ base64Encode: false, fallbackStatus: 404, multiValueHeaders: false }, options);
+
+  // function urls do not support multi values
+  if (options && mode === RoutingMode.Url) {
+    options.multiValueHeaders = false;
+  }
+
+  try {
+    return await parseResponseOrError(mode, response ?? error(options.fallbackStatus, 'Response not found'), options);
+  } catch(err: any) {
+    return await parseResponseOrError(mode, error(err), options);
+  }
+}
+
+async function parseResponseOrError(mode: RoutingMode, input: Response, options: ResponseOptions): Promise<APIGatewayProxyResult | ALBResult | LambdaFunctionURLResult> {
+  let output: APIGatewayProxyResult | ALBResult | LambdaFunctionURLResult;
+  
+  switch (mode) {
+    case RoutingMode.Ag:
+      output = { statusCode: 200, isBase64Encoded: !!options.base64Encode, body: '' };
+      break;
+    case RoutingMode.Alb:
+      output = { statusCode: 200, isBase64Encoded: !!options.base64Encode };
+      break;
+    case RoutingMode.Url:
+      output = { statusCode: 200, isBase64Encoded: !!options.base64Encode };
+      break;
+    default:
+      throw new Error('Unexpected routing mode', { cause: mode });
+  }
+
+  // destructure just what we need
+  const { status, headers, body } = input;
+
+  output.statusCode = status;
+
+  // handle single or multi headers
+  const { headers: singleHeaders, multiValueHeaders } = headersToObjects(headers, options.multiValueHeaders);
+
+  output.headers = {};
+  for (const [key, value] of Object.entries(singleHeaders)) {
+    if (undefined !== value) output.headers[key] = value;
+  }
+
+  if (mode !== RoutingMode.Url) {
+    (output as APIGatewayProxyResult | ALBResult).multiValueHeaders = {};
+    if ('multiValueHeaders' in output && output.multiValueHeaders) {
+      for (const [key, value] of Object.entries(multiValueHeaders)) {
+        if (undefined !== value) output.multiValueHeaders[key] = value;
+      }
+    }
+  }
+
+  // un-streamify body as necessary
+  if (body) {
+    output.body = await text(body);
+    if (options.base64Encode) {
+      output.body = Buffer.from(output.body, 'utf-8').toString('base64');
+    }
+  }
+
+  return output;
+}
+
 /**
  * Combine single and multi value header objects and convert to standardized
  * Headers instance.
  */
-export function objectsToHeaders(
+function objectsToHeaders(
   single: ALBEventHeaders | APIGatewayProxyEventHeaders | undefined,
   multi: ALBEventMultiValueHeaders | APIGatewayProxyEventMultiValueHeaders | undefined
 ): Headers {
@@ -183,7 +263,7 @@ export function objectsToHeaders(
  * Split Headers instance into single and (when explicitly enabled) multi value
  * header objects.
  */
-export function headersToObjects(headers: Headers, splitIntoMultiValues = false): { // headersToObjects
+function headersToObjects(headers: Headers, splitIntoMultiValues = false): { // headersToObjects
   headers: ALBEventHeaders | APIGatewayProxyEventHeaders,
   multiValueHeaders: ALBEventMultiValueHeaders | APIGatewayProxyEventMultiValueHeaders
 } {
@@ -205,7 +285,7 @@ export function headersToObjects(headers: Headers, splitIntoMultiValues = false)
  * Combine single and multi value query string parameters into a well formed
  * query string, as produced by the URLSearchParams global.
  */
-export function objectsToQueryString(
+function objectsToQueryString(
   single: ALBEventQueryStringParameters | APIGatewayProxyEventQueryStringParameters | undefined | null,
   multi: ALBEventMultiValueQueryStringParameters | APIGatewayProxyEventMultiValueQueryStringParameters | undefined | null
 ): string {

@@ -1,5 +1,5 @@
 // API Gateways
-// import * as ag from './ag';
+import * as ag from './ag';
 
 // Application Load Balancers
 import * as alb from './alb';
@@ -22,7 +22,7 @@ import * as url from './url';
  * how the Lambda has been invoked, hence the multiple implementations.
  */
 export {
-  // ag,
+  ag,
   alb,
   url,
 }
