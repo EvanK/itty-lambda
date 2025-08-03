@@ -178,8 +178,6 @@ async function parseResponseOrError(mode: RoutingMode, input: Response, options:
     case RoutingMode.Url:
       output = { statusCode: 200, isBase64Encoded: !!options.base64Encode };
       break;
-    default:
-      throw new Error('Unexpected routing mode', { cause: mode });
   }
 
   // destructure just what we need

@@ -41,11 +41,6 @@ describe('API gateway (CJS)', function () {
       assert.include(req.headers.get('accept'), 'application/xhtml+xml');
       assert.include(req.headers.get('accept'), '*/*');
     });
-    /** TODO:
-     * - multi value headers
-     * - (and query string params)
-     * - 
-     */
 
     it('sparse event', async function () {
       const event = {
@@ -207,6 +202,13 @@ describe('API gateway (CJS)', function () {
 
       assert.equal(res.isBase64Encoded, false);
       assert.equal(res.body, '{"status":418,"error":"im a little teapot"}');
+    });
+
+    it('malformed response', async function () {
+      const res = await ag.responseToResult({ body: 'this should have been a Response instance with headers and a status' });
+
+      assert.equal(res.statusCode, 500);
+      assert.include(res.body, '"error":"Cannot read properties of undefined (reading \'entries\')"');
     });
 
   });

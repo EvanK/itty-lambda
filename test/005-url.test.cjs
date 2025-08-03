@@ -191,6 +191,13 @@ describe('Lambda function urls (CJS)', function () {
       assert.equal(res.body, '{"status":418,"error":"im a little teapot"}');
     });
 
+    it('malformed response', async function () {
+      const res = await url.responseToResult({ body: 'this should have been a Response instance with headers and a status' });
+
+      assert.equal(res.statusCode, 500);
+      assert.include(res.body, '"error":"Cannot read properties of undefined (reading \'entries\')"');
+    });
+
   });
 
 });
