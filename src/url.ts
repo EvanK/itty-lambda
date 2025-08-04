@@ -1,3 +1,9 @@
+/**
+ * Lambda function url implemention
+ * 
+ * @module url
+ */
+
 import type {
   LambdaFunctionURLEvent,
   LambdaFunctionURLResult,

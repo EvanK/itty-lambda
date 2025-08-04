@@ -1,12 +1,3 @@
-// API Gateways
-import ag from './ag';
-
-// Application Load Balancers
-import alb from './alb';
-
-// Lambda function urls
-import url from './url';
-
 /**
  * Each implements the following functions:
  * 
@@ -20,7 +11,20 @@ import url from './url';
  * 
  * The format of each incoming event and outgoing result vary depending on
  * how the Lambda has been invoked, hence the multiple implementations.
+ * 
+ * @module index
+ * @ignore
  */
+
+// API Gateways
+import ag from './ag';
+
+// Application Load Balancers
+import alb from './alb';
+
+// Lambda function urls
+import url from './url';
+
 export {
   ag,
   alb,

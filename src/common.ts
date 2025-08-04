@@ -1,3 +1,10 @@
+/**
+ * Common shared functionality between implementations.
+ * 
+ * @module common
+ * @protected 
+ */
+
 import { text } from 'node:stream/consumers';
 
 import type {

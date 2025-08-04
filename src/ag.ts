@@ -1,3 +1,9 @@
+/**
+ * API gateway implemention
+ * 
+ * @module ag
+ */
+
 import type {
   APIGatewayProxyEvent,
   APIGatewayProxyResult,

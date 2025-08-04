@@ -1,3 +1,9 @@
+/**
+ * Application load balancer implemention
+ * 
+ * @module alb
+ */
+
 import type {
   ALBEvent,
   ALBResult,

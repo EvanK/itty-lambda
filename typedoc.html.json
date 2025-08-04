@@ -1,0 +1,14 @@
+{
+    "$schema": "https://typedoc.org/schema.json",
+    "entryPoints": [
+        "src/*.ts",
+        "node_modules/@types/aws-lambda/*.d.ts",
+        "node_modules/@types/node/globals.d.ts",
+        "node_modules/itty-router/types/*.d.ts"
+    ],
+    "includeVersion": true,
+    "out": "docs/typedoc/html/",
+    "plugin": [ "typedoc-github-theme" ],
+    "sort": [ "visibility" ],
+    "theme": "typedoc-github-theme",
+}
