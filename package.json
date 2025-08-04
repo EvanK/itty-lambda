@@ -38,7 +38,8 @@
     }
   },
   "scripts": {
-    "docs": "typedoc",
+    "docs-html": "typedoc --out docs/typedoc/html/ --entryPoints src/*.ts --entryPoints node_modules/@types/aws-lambda/*.d.ts --entryPoints node_modules/@types/node/globals.d.ts --entryPoints node_modules/itty-router/types/*.d.ts",
+    "docs-md": "typedoc --plugin typedoc-plugin-markdown --out docs/typedoc/md/  --entryPoints src/*.ts",
     "link": "npm link && npm link itty-lambda",
     "lint": "eslint ./src/",
     "test": "nyc mocha ./test/**/*.test.*js",
@@ -56,6 +57,7 @@
     "nyc": "^17.1.0",
     "sinon": "^21.0.0",
     "typedoc": "^0.28.8",
+    "typedoc-plugin-markdown": "^4.8.0",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.34.1"
   },
