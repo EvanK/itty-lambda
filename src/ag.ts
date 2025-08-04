@@ -2,6 +2,9 @@
  * API gateway implemention
  * 
  * @module ag
+ * 
+ * @example
+ * import { eventToRequest, responseToResult } from 'itty-lambda/ag';
  */
 
 import type {

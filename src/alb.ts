@@ -2,6 +2,9 @@
  * Application load balancer implemention
  * 
  * @module alb
+ * 
+ * @example
+ * import { eventToRequest, responseToResult } from 'itty-lambda/alb';
  */
 
 import type {

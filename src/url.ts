@@ -2,6 +2,9 @@
  * Lambda function url implemention
  * 
  * @module url
+ * 
+ * @example
+ * import { eventToRequest, responseToResult } from 'itty-lambda/url';
  */
 
 import type {
