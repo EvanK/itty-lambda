@@ -40,7 +40,7 @@ data "archive_file" "il_test_url_archive" {
 # Lambda function
 resource "aws_lambda_function" "il_test_url_function" {
   filename         = data.archive_file.il_test_url_archive.output_path
-  function_name    = "example_lambda_function"
+  function_name    = "il_test_url_lambda_function"
   role             = aws_iam_role.il_test_url_role.arn
   handler          = "index.handler"
   source_code_hash = data.archive_file.il_test_url_archive.output_base64sha256
