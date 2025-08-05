@@ -34,7 +34,7 @@ resource "aws_iam_role_policy_attachment" "function_logging_policy_attachment" {
 data "archive_file" "il_test_url_archive" {
   type        = "zip"
   source_dir  = "${path.module}/lambda"
-  output_path = "${path.module}/lambda/function.zip"
+  output_path = "${path.module}/lambda.zip"
 }
 
 # Lambda function
