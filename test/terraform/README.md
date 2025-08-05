@@ -11,10 +11,11 @@ For example sake below, we'll use the `url` implementation (for function url inv
 
 ## Preparing for deployment
 
-Change to the implementation's lambda directory and run the build script to install dependencies and prepare for the generated zip:
+Change to the implementation's lambda directory and run the build script:
 
 ```bash
 test/terraform$ cd url/lambda
+# install dependencies and prepare for zipping
 test/terraform/url/lambda$ npm run build
 ```
 
@@ -24,8 +25,13 @@ Next, change back to the impl directory and run terraform to plan and apply chan
 
 ```bash
 test/terraform/url/lambda$ cd ..
+# initialize project (only need to do this once)
+test/terraform/url$ terraform init
+# validate syntax
 test/terraform/url$ terraform validate
+# speculative plan
 test/terraform/url$ terraform plan
+# deploy infrastructure
 test/terraform/url$ terraform apply
 ```
 
