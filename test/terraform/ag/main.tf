@@ -85,7 +85,7 @@ resource "aws_apigatewayv2_integration" "il_test_ag_integration" {
 resource "aws_apigatewayv2_route" "hello_world" {
   api_id = aws_apigatewayv2_api.il_test_ag_gateway.id
 
-  route_key = "GET /hello"
+  route_key = "POST /some/path"
   target    = "integrations/${aws_apigatewayv2_integration.il_test_ag_integration.id}"
 }
 
