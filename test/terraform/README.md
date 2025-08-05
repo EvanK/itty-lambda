@@ -7,6 +7,8 @@ Each implementation will have its own subdirectory consisting of:
 
 For example sake below, we'll use the `url` implementation (for function url invocations).
 
+> Note: I'm currently using [Terraform CLI](https://developer.hashicorp.com/terraform/cli) and [Cloud](https://app.terraform.io/app), but may at some point look into [OpenTofu](https://opentofu.org/) as a fully free and open source replacement.
+
 ## Preparing for deployment
 
 Change to the implementation's lambda directory and run the build script to install dependencies and prepare for the generated zip:
@@ -32,7 +34,7 @@ test/terraform/url$ terraform apply
 Once infrastructure has been deployed, find the output indicating and endpoint url, and test it:
 
 ```bash
-test/terraform/url$ LAMBDA_URL=$(terraform output endpoint_url)
+test/terraform/url$ LAMBDA_URL=$(terraform output -raw endpoint_url)
 test/terraform/url$ curl -vvvv -X POST -d '{"body":"data"}' -H "X-Custom-Headers: stuff" "$LAMBDA_URL/some/path?and=query&string=values"
 ```
 

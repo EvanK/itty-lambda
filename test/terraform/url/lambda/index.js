@@ -7,7 +7,7 @@ export async function handler (event, context) {
     console.log('Created and configuring router...');
     router.all('*', (request) => {
       console.log('Executing request handler...');
-      console.dir({request, headers: request.headers.entries()}, {depth:999});
+      console.dir({request, headers: Array.from(request.headers.entries())}, {depth:999});
       return {
         time: new Date().toISOString(),
         functionName: context.functionName,
@@ -21,7 +21,7 @@ export async function handler (event, context) {
     const request = await eventToRequest(event);
 
     console.log('Routing request...');
-    console.dir({request, headers: request.headers.entries()}, {depth:999});
+    console.dir({request, headers: Array.from(request.headers.entries())}, {depth:999});
     const response = await router.fetch(request);
 
     console.log('Converting response to result...');
