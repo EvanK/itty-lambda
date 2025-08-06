@@ -102,6 +102,7 @@ resource "aws_lb" "il_test_alb_balancer" {
   internal           = false
   load_balancer_type = "application"
   subnets            = data.aws_subnets.default_vpc_subnets.ids
+  security_groups    = data.aws_security_groups.default_sg.ids
 }
 
 # lb listener and target group
@@ -129,7 +130,7 @@ resource "aws_lambda_permission" "with_lb" {
   source_arn    = aws_lb_target_group.il_test_alb_targetgroup.arn
 }
 resource "aws_lb_target_group_attachment" "lambda-tg-attach" {
-  target_group_arn = "${aws_lb_target_group.il_test_alb_targetgroup.arn}"
-  target_id        = "${aws_lambda_function.il_test_alb_function.arn}"
+  target_group_arn = aws_lb_target_group.il_test_alb_targetgroup.arn
+  target_id        = aws_lambda_function.il_test_alb_function.arn
   depends_on       = [aws_lambda_permission.with_lb]
 }
