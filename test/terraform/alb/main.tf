@@ -30,6 +30,15 @@ resource "aws_iam_role_policy_attachment" "function_logging_policy_attachment" {
   policy_arn = data.aws_iam_policy.lambda_basic_execution_policy.arn
 }
 
+data "aws_iam_policy" "lambda_ec2_networking" {
+  arn = "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "function_networking_connect" {
+  role       = aws_iam_role.il_test_alb_role.name
+  policy_arn = data.aws_iam_policy.lambda_ec2_networking.arn
+}
+
 # Package the Lambda function code
 data "archive_file" "il_test_alb_archive" {
   type        = "zip"
@@ -93,6 +102,8 @@ resource "aws_lb" "il_test_alb_balancer" {
 # lb listener and target group
 resource "aws_lb_listener" "il_test_alb_listener" {
   load_balancer_arn = aws_lb.il_test_alb_balancer.arn
+  port              = "80"
+  protocol          = "HTTP"
 
   default_action {
     target_group_arn = aws_lb_target_group.il_test_alb_targetgroup.arn
