@@ -1,5 +1,5 @@
 output "endpoint_url" {
-  value = aws_lb.il_test_alb_balancer.dns_name
+  value = "http://${aws_lb.il_test_alb_balancer.dns_name}"
 }
 
 output "lambda_arn" {
