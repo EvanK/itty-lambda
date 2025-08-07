@@ -14,7 +14,8 @@
   "homepage": "https://github.com/EvanK/itty-lambda",
   "keywords": [
     "itty-router",
-    "router"
+    "router",
+    "aws-lambda"
   ],
   "files": [
     "build/**/*.js"
