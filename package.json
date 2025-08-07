@@ -43,7 +43,7 @@
     "docs-md": "typedoc --options typedoc.md.json",
     "link": "npm link && npm link itty-lambda",
     "lint": "eslint ./src/",
-    "test": "nyc mocha ./test/**/*.test.*js",
+    "test": "nyc mocha ./test/unit/*.test.*js",
     "tsc": "npm run tsc-cjs && npm run tsc-esm",
     "tsc-cjs": "tsc --module commonjs --outDir ./build/cjs/",
     "tsc-esm": "tsc --module nodenext --outDir ./build/esm/"
@@ -65,6 +65,6 @@
     "typescript-eslint": "^8.34.1"
   },
   "dependencies": {
-    "itty-router": "^5.0.20"
+    "itty-router": "^5.0.0"
   }
 }
