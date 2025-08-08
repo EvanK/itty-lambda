@@ -57,7 +57,7 @@ resource "aws_lambda_function" "il_test_alb_function" {
   runtime = "nodejs20.x"
 
   vpc_config {
-    subnet_ids = data.aws_subnets.default_vpc_subnets.ids
+    subnet_ids = slice(data.aws_subnets.default_vpc_subnets.ids, 0, 2)
     security_group_ids = data.aws_security_groups.default_sg.ids
   }
 
@@ -72,6 +72,14 @@ resource "aws_lambda_function" "il_test_alb_function" {
     Environment = "sandbox"
     Application = "itty-lambda-test-url"
   }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "allow_http_from_lb" {
+  security_group_id = data.aws_security_groups.default_sg.ids[0]
+  from_port   = 80
+  to_port     = 80
+  ip_protocol = "tcp"
+  cidr_ipv4   = "0.0.0.0/0"
 }
 
 # default vpc, subnets and security groups
@@ -101,8 +109,30 @@ resource "aws_lb" "il_test_alb_balancer" {
   name               = "lambda-load-balancer"
   internal           = false
   load_balancer_type = "application"
-  subnets            = data.aws_subnets.default_vpc_subnets.ids
-  security_groups    = data.aws_security_groups.default_sg.ids
+  subnets            = slice(data.aws_subnets.default_vpc_subnets.ids, 0, 2)
+  security_groups    = [aws_security_group.il_test_alb_fe_sg.id]
+}
+
+resource "aws_security_group" "il_test_alb_fe_sg" {
+  name = "public_facing_http_sg"
+  vpc_id = data.aws_vpc.default_vpc.id
+
+  # allow all inbound TCP traffic on port 90
+  ingress {
+    from_port        = 80
+    to_port          = 80
+    protocol         = "TCP"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
 }
 
 # lb listener and target group
