@@ -4,6 +4,9 @@
 <a href="https://nodejs.org/docs/latest-v20.x/api/">
 <img src="https://img.shields.io/badge/Node.js-v20-yellow" alt="node.js support as of v20">
 </a></p>
+<p><a href="https://www.npmjs.com/package/itty-lambda">
+<img src="https://nodei.co/npm/itty-lambda.png" alt="npm">
+</a></p>
 <p>AWS Lambda functions can respond to HTTP requests via one of the following invocation types:</p>
 <ul>
 <li><a href="https://docs.aws.amazon.com/lambda/latest/dg/urls-invocation.html">Function urls</a></li>
@@ -16,7 +19,7 @@
 
 <p>Each implementation provides these two named exports, for you to plug in before and after routing...</p>
 <p>For more information, see <a href="https://EvanK.github.io/itty-lambda/">the documentation</a>.</p>
-<h2 id="eventtorequest" class="tsd-anchor-link">eventToRequest<a href="#eventtorequest" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p>Accepts an AWS Lambda event for the invocation type, and resolves to a well formed <code>RequestLike</code>.</p>
+<h2 id="eventtorequest" class="tsd-anchor-link">eventToRequest<a href="#eventtorequest" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p>Accepts an AWS Lambda event for the invocation type, and resolves to a well formed <a href="https://EvanK.github.io/itty-lambda/types/node_modules_itty-router_types_RequestLike.RequestLike.html"><code>RequestLike</code></a>.</p>
 <pre><code class="ts"><span class="hl-6">eventToRequest</span><span class="hl-2">(</span><br/><span class="hl-2">    </span><span class="hl-3">event</span><span class="hl-2">: </span><span class="hl-3">APIGatewayProxyEvent</span><span class="hl-2"> | </span><span class="hl-3">ALBEvent</span><span class="hl-2"> | </span><span class="hl-3">LambdaFunctionURLEvent</span><span class="hl-2">,</span><br/><span class="hl-2">    </span><span class="hl-3">options</span><span class="hl-2">: </span><span class="hl-3">EventOptions</span><span class="hl-2"> | </span><span class="hl-5">undefined</span><br/><span class="hl-2">) : </span><span class="hl-8">Promise</span><span class="hl-2">&lt;</span><span class="hl-3">RequestLike</span><span class="hl-2">&gt;</span>
 </code><button type="button">Copy</button></pre>
 
@@ -38,7 +41,7 @@
 </tr>
 </tbody>
 </table>
-<h2 id="responsetoresult" class="tsd-anchor-link">responseToResult<a href="#responsetoresult" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p>Accepts a router <code>Response</code>, and resolves to a result for the invocation type.</p>
+<h2 id="responsetoresult" class="tsd-anchor-link">responseToResult<a href="#responsetoresult" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p>Accepts a router <a href="https://developer.mozilla.org/docs/Web/API/Response"><code>Response</code></a>, and resolves to a result for the invocation type.</p>
 <pre><code class="ts"><span class="hl-6">responseToResult</span><span class="hl-2">(</span><br/><span class="hl-2">    </span><span class="hl-3">response</span><span class="hl-2">: </span><span class="hl-3">Response</span><span class="hl-2"> | </span><span class="hl-5">undefined</span><span class="hl-2">,</span><br/><span class="hl-2">    </span><span class="hl-3">options</span><span class="hl-2"> : </span><span class="hl-3">ResponseOptions</span><span class="hl-2"> | </span><span class="hl-5">undefined</span><br/><span class="hl-2">) : </span><span class="hl-8">Promise</span><span class="hl-2">&lt;</span><span class="hl-3">APIGatewayProxyResult</span><span class="hl-2"> | </span><span class="hl-3">ALBResult</span><span class="hl-2"> | </span><span class="hl-3">LambdaFunctionURLResult</span><span class="hl-2">&gt;</span>
 </code><button type="button">Copy</button></pre>
 
