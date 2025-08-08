@@ -1,5 +1,13 @@
 # `itty-lambda` - AWS Lambda support for [itty-router]
 
+[
+  ![ci status](https://github.com/EvanK/itty-lambda/actions/workflows/ci.yaml/badge.svg)
+](https://github.com/EvanK/itty-lambda/actions/workflows/ci.yaml)
+[
+  ![node.js support as of v20](https://img.shields.io/badge/Node.js-v20-yellow)
+](https://nodejs.org/docs/latest-v20.x/api/)
+
+
 AWS Lambda functions can respond to HTTP requests via one of the following invocation types:
 - [Function urls][lambda-function-urls]
 - [API gateways][api-gateways]
@@ -45,6 +53,8 @@ export async function handler (event) {
 ```
 
 Each implementation provides these two named exports, for you to plug in before and after routing...
+
+For more information, see [the documentation](https://EvanK.github.io/itty-lambda/).
 
 ## eventToRequest
 

@@ -170,7 +170,7 @@ export async function responseToResult(mode: RoutingMode, response: Response | u
 
   try {
     return await parseResponseOrError(mode, response ?? error(options.fallbackStatus, 'Response not found'), options);
-  } catch(err: any) {
+  } catch(err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
     return await parseResponseOrError(mode, error(err), options);
   }
 }
@@ -231,7 +231,7 @@ function objectsToHeaders(
   single: ALBEventHeaders | APIGatewayProxyEventHeaders | undefined,
   multi: ALBEventMultiValueHeaders | APIGatewayProxyEventMultiValueHeaders | undefined
 ): Headers {
-  const input: { [name: string]: string[] } = {};
+  const input: Record<string, string[]> = {};
 
   // add each single value header, wrapped in array
   if (single) {
