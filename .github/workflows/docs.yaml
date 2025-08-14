@@ -2,6 +2,9 @@ name: Regenerate documentation
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - docs-workflow
 
 jobs:
   generate-and-commit:
