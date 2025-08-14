@@ -19,15 +19,21 @@ jobs:
       with:
         node-version: 20.x
         cache: 'npm'
-    - run: git checkout $(git describe --tags $(git rev-list --tags --max-count=1))
+    - name: Checkout latest tag
+      run: git checkout $(git describe --tags $(git rev-list --tags --max-count=1))
     - run: npm ci
-    - run: npm run docs-html
-    - run: git checkout github-pages
-    - run: ls -A -1 --ignore '.git' --ignore 'docs' | xargs rm -rf
-    - run: |
+    - name: Build html docs
+      run: npm run docs-html
+    - name: Checkout docs branch
+      run: git checkout github-pages
+    - name: Remove everything in working dir other than .git and docs directories
+      run: ls -A -1 --ignore '.git' --ignore 'docs' | xargs rm -rf
+    - name: Move html typedocs to working dir and remove whatever's left in docs dir
+      run: |
         mv -f docs/typedoc/html/* ./
-        rmdir docs
-    - run: |
+        rm -rf docs/
+    - name: Configure, add, commit and push any changes to docs branch
+      run: |
         git config --global user.email "${{ github.actor }}"
         git config --global user.name "${{ github.actor }}"
         git add .
