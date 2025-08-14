@@ -22,6 +22,6 @@ jobs:
     - run: npm ci
     - run: npm run docs-html
     - run: git checkout github-pages
-    - run: ls -A -1 --ignore '.git' --ignore 'docs' | xargs rm -f
+    - run: ls -A -1 --ignore '.git' --ignore 'docs' | xargs rm -rf
     - run: mv -f docs/* ./ && rmdir docs
     - run: git add * && git commit -m "Docs updated -- $(date)" && git push origin github-pages
