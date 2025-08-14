@@ -1,9 +1,0 @@
-.nyc_output/
-build/
-docs/typedoc/
-node_modules/
-test/artifacts/
-.terraform/
-.terraform.lock.hcl
-test/terraform/**/lambda/
-test/terraform/**/lambda.zip
