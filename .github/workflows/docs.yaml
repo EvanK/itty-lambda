@@ -24,7 +24,9 @@ jobs:
     - run: npm run docs-html
     - run: git checkout github-pages
     - run: ls -A -1 --ignore '.git' --ignore 'docs' | xargs rm -rf
-    - run: mv -f docs/* ./ && rmdir docs
+    - run: |
+        mv -f docs/typedoc/html/* ./
+        rmdir docs
     - run: |
         git config --global user.email "${{ github.actor }}"
         git config --global user.name "${{ github.actor }}"
