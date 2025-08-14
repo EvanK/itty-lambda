@@ -24,4 +24,5 @@ jobs:
     - run: git checkout github-pages
     - run: ls -A -1 --ignore '.git' --ignore 'docs' | xargs rm -rf
     - run: mv -f docs/* ./ && rmdir docs
+    - run: git config --global user.email "evan@evanskaufman.com" && git config --global user.name "Evan Kaufman"
     - run: git add * && git commit -m "Docs updated -- $(date)" && git push origin github-pages
