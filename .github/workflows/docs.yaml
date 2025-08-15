@@ -59,3 +59,4 @@ jobs:
         git add .
         git commit -m "Docs updated -- $(date)"
         git push origin github-pages
+      continue-on-error: true
