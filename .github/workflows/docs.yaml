@@ -6,9 +6,6 @@ on:
       tag:
         description: 'Tagged version from which to generate docs'
         required: false
-  push:
-    branches:
-      - docs-workflow
 
 jobs:
   generate-and-commit:
