@@ -7,6 +7,9 @@
   ![node.js support as of v20](https://img.shields.io/badge/Node.js-v20-yellow)
 ](https://nodejs.org/docs/latest-v20.x/api/)
 
+[
+  ![npm](https://nodei.co/npm/itty-lambda.png)
+](https://www.npmjs.com/package/itty-lambda)
 
 AWS Lambda functions can respond to HTTP requests via one of the following invocation types:
 - [Function urls][lambda-function-urls]
