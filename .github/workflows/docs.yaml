@@ -13,14 +13,14 @@ jobs:
     permissions:
       contents: write
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         fetch-depth: 0
         fetch-tags: true
         ref: main
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@v6
       with:
-        node-version: 20.x
+        node-version: 22.x
         cache: 'npm'
 
     - name: Set target as specified input tag
