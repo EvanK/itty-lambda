@@ -20,14 +20,11 @@ describe('Lambda function urls (CJS)', function () {
           },
         },
         rawPath: '/path/to/resource',
-        rawQueryString: 'query=1234ABCD',
-        queryStringParameters: {
-          query: '5678EFGH',
-        },
+        rawQueryString: 'query1=1234ABCD&query1=5678EFGH&query2=9012IJKL',
         headers: {
-          accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+          Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
           host: 'expialadocious.xyz',
-          'x-forwarded-port': '80',
+          'X-Forwarded-Port': '80',
           'x-forwarded-proto': 'https',
         },
         body: 'eyJ0ZXN0IjoiYm9keSJ9',
@@ -37,8 +34,11 @@ describe('Lambda function urls (CJS)', function () {
 
       assert.equal(req.method, 'POST');
 
-      // assembled url
-      assert.equal(req.url, 'https://supercalifragilistic.abc/path/to/resource?query=1234ABCD')
+      // assembled url (minus query)
+      assert(req.url.startsWith('https://supercalifragilistic.abc/path/to/resource'));
+
+      // raw query string (minus leading url)
+      assert(req.url.endsWith('?query1=1234ABCD&query1=5678EFGH&query2=9012IJKL'));
 
       // base64 decoded body
       assert.equal(req.body, '{"test":"body"}');
@@ -51,6 +51,7 @@ describe('Lambda function urls (CJS)', function () {
 
     it('sparse event', async function () {
       const event = {
+        rawQueryString: 'query=1234ABCD',
         queryStringParameters: {
           query: '5678EFGH',
         },
@@ -62,7 +63,10 @@ describe('Lambda function urls (CJS)', function () {
       assert.equal(req.method, 'GET');
 
       // assembled url from mostly defaults
-      assert.equal(req.url, 'http://localhost.localdomain?query=5678EFGH')
+      assert(req.url.startsWith('http://localhost.localdomain'));
+
+      // query string, should prefer raw over params obj
+      assert(req.url.endsWith('?query=1234ABCD'));
 
       // body not defined, should ignore base64 flag
       assert.equal(req.body, undefined);
@@ -102,13 +106,24 @@ describe('Lambda function urls (CJS)', function () {
         headers: {
           'Accept': 'text/html'
         },
-        // we shouldn't have these for a function url
+        // w/o a raw query string, comma-delimited multi values won't get broken out
+        queryStringParameters: {
+          query1: '1234ABCD',
+          query3: 'bravo,charlie',
+        },
+        // we shouldn't have the following for a function url
         multiValueHeaders: {
           'Accept': ['text/plain', 'application/json', 'application/xml']
+        },
+        multiValueQueryStringParameters: {
+          query1: ['5678EFGH'],
+          query2: ['9012IJKL'],
         }
       });
 
       assert.equal(req.headers.get('accept'), 'text/html');
+
+      assert(req.url.endsWith('?query1=1234ABCD&query3=bravo%2Ccharlie'), req.url);
     });
 
   });
@@ -166,12 +181,21 @@ describe('Lambda function urls (CJS)', function () {
       const res = await url.responseToResult(
         status(
           204,
-          { headers: { 'Cookie-set': cookies.join(',') } }
+          {
+            headers: {
+              'access-control-allow-origin': '*',
+              'Set-Cookie': cookies.join(','),
+              'CACHE-CONTROL': 'no-cache ,	no-store,no-transform, must-revalidate	',
+            }
+          }
         ),
         { multiValueHeaders: true }
       );
 
-      assert.deepEqual(res.headers['cookie-set'], cookies.join(','));
+      assert.deepEqual(res.headers['access-control-allow-origin'], '*');
+      assert.deepEqual(res.headers['set-cookie'], cookies.join(','));
+      assert.deepEqual(res.headers['cache-control'], 'no-cache ,	no-store,no-transform, must-revalidate');
+
       assert.equal(res.multiValueHeaders, undefined);
     });
 

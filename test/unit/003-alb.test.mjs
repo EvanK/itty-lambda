@@ -101,12 +101,12 @@ describe('Application load balancers (ESM)', function () {
           b: ['lorem', 'ipsum'],
         },
         headers: {
-          accept: 'text/html',
-          'accept-encoding': 'gzip',
+          Accept: 'text/html ',
+          'Accept-encoding': 'gzip',
         },
         multiValueHeaders: {
-          accept: ['application/xml', 'application/json'],
-          'x-forwarded-port': ['80','443']
+          accept: ['	application/xml', ' application/json', 'text/html'],
+          'X-Forwarded-Port': ['80','443']
         },
       });
 
@@ -179,13 +179,34 @@ describe('Application load balancers (ESM)', function () {
       const res = await alb.responseToResult(
         status(
           204,
-          { headers: { 'Cookie-set': cookies.join(',') } }
+          {
+            headers: {
+              'access-control-allow-origin': '*',
+              'Set-Cookie': cookies.join(','),
+              'CACHE-CONTROL': 'no-cache ,	no-store,no-transform, must-revalidate	',
+            }
+          }
         ),
         { multiValueHeaders: true }
       );
 
-      assert.equal(res.headers['cookie-set'], undefined);
-      assert.deepEqual(res.multiValueHeaders['cookie-set'], cookies);
+      assert.equal(res.headers['access-control-allow-origin'], undefined);
+      assert.deepEqual(
+        res.multiValueHeaders['access-control-allow-origin'],
+        ['*']
+      );
+
+      assert.equal(res.headers['set-cookie'], undefined);
+      assert.deepEqual(
+        res.multiValueHeaders['set-cookie'],
+        cookies
+      );
+
+      assert.equal(res.headers['cache-control'], undefined);
+      assert.deepEqual(
+        res.multiValueHeaders['cache-control'],
+        [ 'no-cache', 'no-store', 'no-transform', 'must-revalidate' ]
+      );
     });
 
     it('plain error', async function () {

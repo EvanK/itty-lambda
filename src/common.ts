@@ -235,20 +235,24 @@ function objectsToHeaders(
 
   // add each single value header, wrapped in array
   if (single) {
-    for (const [key, value] of Object.entries(single)) {
+    for (let [key, value] of Object.entries(single)) {
+      key = key.toLowerCase();
+      value = value?.trim();
       if (value) input[key] = [ value ];
     }
   }
 
   // and each multi value header
   if (multi) {
-    for (const [key, values] of Object.entries(multi)) {
+    for (let [key, values] of Object.entries(multi)) {
+      key = key.toLowerCase();
       if (values) {
         // merge with any existing arrays of values
         if (undefined === input?.[key]) {
           input[key] = values;
         } else {
-          for (const value of values) {
+          for (let value of values) {
+            value = value.trim();
             if (!input[key].includes(value)) input[key].push(value);
           }
         }
@@ -271,7 +275,7 @@ function objectsToHeaders(
  * Split Headers instance into single and (when explicitly enabled) multi value
  * header objects.
  */
-function headersToObjects(headers: Headers, splitIntoMultiValues = false): { // headersToObjects
+function headersToObjects(headers: Headers, splitIntoMultiValues = false): {
   headers: ALBEventHeaders | APIGatewayProxyEventHeaders,
   multiValueHeaders: ALBEventMultiValueHeaders | APIGatewayProxyEventMultiValueHeaders
 } {
@@ -279,8 +283,8 @@ function headersToObjects(headers: Headers, splitIntoMultiValues = false): { // 
   const multi: ALBEventMultiValueHeaders | APIGatewayProxyEventMultiValueHeaders = {};
 
   for (const [key, value] of headers.entries() ) {
-    if (splitIntoMultiValues && value.includes(',')) {
-      multi[key] = value.split(/\s*,\s*/);
+    if (splitIntoMultiValues) {
+      multi[key] = value.split(',').map(v=> v.trim());
     } else {
       single[key] = value;
     }
