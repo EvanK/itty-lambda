@@ -244,6 +244,7 @@ function objectsToHeaders(
 
   // and each multi value header
   if (multi) {
+    // eslint-disable-next-line prefer-const
     for (let [key, values] of Object.entries(multi)) {
       key = key.toLowerCase();
       if (values) {
