@@ -1,6 +1,6 @@
 {
   "name": "itty-lambda",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "AWS Lambda support for itty-router",
   "author": "Evan Kaufman <evan@evanskaufman.com>",
   "license": "MIT",
