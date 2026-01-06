@@ -3,7 +3,7 @@ import { assert } from 'chai';
 // NOTE: to properly test export formats, its necessary to first run:
 // npm link && npm link itty-lambda
 
-describe('ESM exports', function () {
+describe('002 - ESM exports', function () {
 
   it('top level default export', async function () {
     const ittyLambda = await import('itty-lambda');

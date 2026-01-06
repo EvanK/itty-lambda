@@ -44,7 +44,9 @@
     "docs-md": "typedoc --options typedoc.md.json",
     "link": "npm link && npm link itty-lambda",
     "lint": "eslint ./src/",
-    "test": "nyc mocha ./test/unit/*.test.*js",
+    "test-prepare": "bash test/prep.sh",
+    "test-clean": "bash test/clean.sh",
+    "test": "npm run test-prepare && nyc mocha ./test/unit/*.test.*js",
     "tsc": "npm run tsc-cjs && npm run tsc-esm",
     "tsc-cjs": "tsc --module commonjs --outDir ./build/cjs/",
     "tsc-esm": "tsc --module nodenext --outDir ./build/esm/"

@@ -3,7 +3,7 @@ const { assert } = require('chai');
 // NOTE: to properly test export formats, its necessary to first run:
 // npm link && npm link itty-lambda
 
-describe('CJS exports', function () {
+describe('001 - CJS exports', function () {
 
   it('top level default export', async function () {
     const ittyLambda = require('itty-lambda');

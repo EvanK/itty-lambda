@@ -1,12 +1,4 @@
-const { assert, config: chaiConfig } = require('chai');
-
-const { error, json, html, status, StatusError } = require('itty-router');
-
-chaiConfig.truncateThreshold = 0;
-
-const ag = require('itty-lambda/ag');
-
-describe('API gateway (CJS)', function () {
+describe(`004 - API gateway (${moduleLoader})`, function () {
 
   describe('eventToRequest', function () {
 
