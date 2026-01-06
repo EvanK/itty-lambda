@@ -1,12 +1,4 @@
-import { assert, config as chaiConfig } from 'chai';
-
-import { error, json, html, status, StatusError } from 'itty-router';
-
-chaiConfig.truncateThreshold = 0;
-
-import ag from 'itty-lambda/ag';
-
-describe('API gateway (ESM)', function () {
+describe(`003 - Application load balancers (${moduleLoader})`, function () {
 
   describe('eventToRequest', function () {
 
@@ -26,7 +18,7 @@ describe('API gateway (ESM)', function () {
         body: 'eyJ0ZXN0IjoiYm9keSJ9',
         isBase64Encoded: true,
       };
-      const req = await ag.eventToRequest(event);
+      const req = await alb.eventToRequest(event);
 
       assert.equal(req.method, 'POST');
 
@@ -49,7 +41,7 @@ describe('API gateway (ESM)', function () {
         },
         isBase64Encoded: true,
       };
-      const req = await ag.eventToRequest(event);
+      const req = await alb.eventToRequest(event);
 
       // default method (i _think_ this is correct behaviour)
       assert.equal(req.method, 'GET');
@@ -70,7 +62,7 @@ describe('API gateway (ESM)', function () {
     });
 
     it('empty event', async function () {
-      const req = await ag.eventToRequest({}, { defaultMethod: 'HEAD' });
+      const req = await alb.eventToRequest({}, { defaultMethod: 'HEAD' });
 
       assert.equal(req.method, 'HEAD');
 
@@ -82,7 +74,7 @@ describe('API gateway (ESM)', function () {
 
     it('request body w/o base64 encoding', async function () {
       const body = '{"lorem":"ipsum"}';
-      const req = await ag.eventToRequest({
+      const req = await alb.eventToRequest({
         body,
         isBase64Encoded: false,
       });
@@ -91,7 +83,7 @@ describe('API gateway (ESM)', function () {
     });
 
     it('multi value headers and query strings', async function () {
-      const req = await ag.eventToRequest({
+      const req = await alb.eventToRequest({
         queryStringParameters: {
           a: '123zyx',
           z: '987abc',
@@ -130,7 +122,7 @@ describe('API gateway (ESM)', function () {
 
     it('well formed response', async function () {
       // simple json encoding with addtl status
-      const res = await ag.responseToResult(
+      const res = await alb.responseToResult(
         json({ message: "received" }, { status: 202 })
       );
 
@@ -140,13 +132,13 @@ describe('API gateway (ESM)', function () {
   
     it('undefined response', async function () {
       // first, implicit undefined
-      const res1 = await ag.responseToResult();
+      const res1 = await alb.responseToResult();
 
       assert.equal(res1.statusCode, 404);
       assert.equal(res1.body, '{"status":404,"error":"Response not found"}');
 
       // then explicitly with different default status
-      const res = await ag.responseToResult(undefined, { fallbackStatus: 420});
+      const res = await alb.responseToResult(undefined, { fallbackStatus: 420});
 
       assert.equal(res.statusCode, 420);
       assert.equal(res.body, '{"status":420,"error":"Response not found"}');
@@ -154,18 +146,18 @@ describe('API gateway (ESM)', function () {
 
     it('status without body', async function () {
       // feed response with null body
-      const res = await ag.responseToResult(
+      const res = await alb.responseToResult(
         status(301, { headers: { location: '/new/path' } })
       );
 
       assert.equal(res.statusCode, 301);
-      assert.equal(res.body, '');
+      assert.equal(res.body, undefined);
       assert.equal(res.headers.location, '/new/path');
     });
 
     it('response encoding', async function () {
       // base64 encode response body
-      const res = await ag.responseToResult(
+      const res = await alb.responseToResult(
         html('howdy'),
         { base64Encode: true }
       );
@@ -176,7 +168,7 @@ describe('API gateway (ESM)', function () {
 
     it('multivalue headers', async function () {
       const cookies = [ 'path=/; domain=xyz.com', 'path=/; domain=abc.org; httponly' ];
-      const res = await ag.responseToResult(
+      const res = await alb.responseToResult(
         status(
           204,
           {
@@ -211,7 +203,7 @@ describe('API gateway (ESM)', function () {
 
     it('plain error', async function () {
       const err = new Error('shit done broke');
-      const res = await ag.responseToResult(error(err));
+      const res = await alb.responseToResult(error(err));
 
       assert.equal(res.isBase64Encoded, false);
       assert.equal(res.body, '{"status":500,"error":"shit done broke"}');
@@ -219,14 +211,14 @@ describe('API gateway (ESM)', function () {
 
     it('status error', async function () {
       const err = new StatusError(418, 'im a little teapot');
-      const res = await ag.responseToResult(error(err));
+      const res = await alb.responseToResult(error(err));
 
       assert.equal(res.isBase64Encoded, false);
       assert.equal(res.body, '{"status":418,"error":"im a little teapot"}');
     });
 
     it('malformed response', async function () {
-      const res = await ag.responseToResult({ body: 'this should have been a Response instance with headers and a status' });
+      const res = await alb.responseToResult({ body: 'this should have been a Response instance with headers and a status' });
 
       assert.equal(res.statusCode, 500);
       assert.include(res.body, '"error":"Cannot read properties of undefined (reading \'entries\')"');
