@@ -4,8 +4,8 @@
   ![ci status](https://github.com/EvanK/itty-lambda/actions/workflows/ci.yaml/badge.svg)
 ](https://github.com/EvanK/itty-lambda/actions/workflows/ci.yaml)
 [
-  ![node.js support as of v20](https://img.shields.io/badge/Node.js-v20-yellow)
-](https://nodejs.org/docs/latest-v20.x/api/)
+  ![Node.js supported and tested on v20 through v26](https://img.shields.io/badge/Node.js-v20%20--%20v26-seagreen?logo=nodedotjs "Node.js supported and tested on v20 through v26")
+](https://nodejs.org/en/about/previous-releases)
 
 [
   ![npm](https://nodei.co/npm/itty-lambda.png)
