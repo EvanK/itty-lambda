@@ -1,6 +1,6 @@
 {
   "name": "itty-lambda",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "description": "AWS Lambda support for itty-router",
   "author": "Evan Kaufman <evan@evanskaufman.com>",
   "license": "MIT",
@@ -53,21 +53,21 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@types/aws-lambda": "^8.10.161",
-    "@types/node": "^25.3.5",
+    "@types/aws-lambda": "^8.10.162",
+    "@types/node": "^26.4.0",
     "chai": "^6.2.2",
-    "eslint": "^10.0.3",
-    "mocha": "^11.7.5",
+    "eslint": "^10.9.1",
+    "mocha": "^11.8.0",
     "nyc": "^18.0.0",
-    "sinon": "^21.0.2",
-    "typedoc": "^0.28.17",
+    "sinon": "^22.1.0",
+    "typedoc": "^0.28.20",
     "typedoc-github-theme": "^0.4.0",
-    "typedoc-plugin-markdown": "^4.10.0",
+    "typedoc-plugin-markdown": "^4.13.0",
     "typedoc-plugin-mdn-links": "^5.1.1",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.56.1"
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.68.0"
   },
   "dependencies": {
-    "itty-router": "^5.0.23"
+    "itty-router": "^5.0.24"
   }
 }
